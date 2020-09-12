@@ -1,6 +1,7 @@
 #include <iostream>
 #include<fstream>
 // MANANA: queremos tener un grid de punteros dirigidos a objetos (pixel) 
+#define M;
 class Pixel{
     private:
         char cel_type;
