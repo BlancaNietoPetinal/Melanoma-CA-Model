@@ -1,56 +1,58 @@
 #include <iostream>
-#include <array>
+#include <vector>
+
+#define M 300
+#define N 300
 // https://processing.org/tutorials/2darray/
+//PROBLEMA: me sobreexcribe el pixel (comparar con cuadrado??)
 class Pixel{
     private:
         char cel_type;
     public:
-        Pixel(){cel_type = 'S';};
+        Pixel(){/*cel_type = 'O';*/};
         Pixel(char _type){cel_type = _type;};
-        char get_type(){return cel_type;}
+        char getType(){return cel_type;}
+        ~Pixel(){};
 };
 
 class Grid{
     private:
         int rows, cols;
-        Pixel g[0][0], *p[0][0]; //g guarda objetos y p guarda punteros
+        Pixel  *p[M][N], p0 = 'T';
     public:
-        Grid(int, int); //create the grid
+        Grid(); //create the grid
         Grid(int, int, Pixel); //place the pixel
-        auto get_grid(){return g;}; //SEGUIR POR AQUI
-        void print_pixel(int, int);
+       //auto get_grid(){return g;}; //SEGUIR POR AQUI
+        /*void add_pixel(int, int, Pixel);
+        void print_pixel(int, int);*/
 
 };
 
-Grid::Grid(int M, int N){
-    Pixel p0;
+Grid::Grid(){
     rows = M;
     cols = N;
     for (int i = 0; i < cols; i++) {
         for (int j = 0; j < rows; j++) {
-            g[i][j] = p0;
-            p[i][j] = &p0;
+        //g[i][j] = p0;
+        p[i][j] = &p0;
         }
     }
 };
 
-Grid::Grid(int _rows, int _cols, Pixel _p){
-    p[0][0] = &_p;
-    std::cout<<p[0][0];
-    g[_rows][_cols] = _p;
+/*void Grid::add_pixel(int _rows, int _cols, Pixel _p){
+    //p[_rows][_cols] = &_p;
+    //[_rows][_cols] = _p;
 };
 
 void Grid::print_pixel(int x, int y){
-    std::cout<<"El pixel deseado es:"<<g[x][y].get_type();
+    std::cout<<p[x][y]->getType();
 };
+*/
 
 int main(){
-    int M = 3, N = 4;
-    Pixel p1('T'), *pt; //Set the pixel type
-    pt = &p1;
-    //std::cout<<"El pixel es de tipo: "<<pt->get_type();
-
-    Grid g(M,N);
-    //std::cout<<"El pixel es de tipo: ";
-    g.print_pixel(1,1);
+    Pixel p1('T'), p2('H');
+    std::cout<<"Before: "<<p1.getType()<<p2.getType()<<std::endl;
+    Grid g();
+    std::cout<<"After: "<<p1.getType()<<p2.getType()<<std::endl;
+    
 };
