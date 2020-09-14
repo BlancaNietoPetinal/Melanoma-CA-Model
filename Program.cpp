@@ -1,15 +1,15 @@
 #include <iostream>
-#include <vector>
+#include <array>
 
-#define M 300
-#define N 300
+#define cols 300
+#define rows 300
 // https://processing.org/tutorials/2darray/
 
 class Pixel{
     private:
         char cel_type;
     public:
-        Pixel(){/*cel_type = 'O';*/};
+        Pixel(){cel_type = 'O';};
         Pixel(char _type){cel_type = _type;};
         char getType(){return cel_type;}
         ~Pixel(){};
@@ -17,19 +17,19 @@ class Pixel{
 
 class Grid{
     private:
-        int rows, cols;
-        Pixel  *p[M][N], p0 = 'R';
+        std::array<std::array<Pixel*,rows>,cols> p; //mejor usar array que *p[rows][cols]
+        std::array<std::array<char,rows>,cols> X;
+        Pixel  p0;
     public:
         Grid(); //create the grid
-        void print_pixel(int x, int y){std::cout<<p[x][y]->getType();};
-        void add_pixel(int x, int y, Pixel pxl){p[x][y] = &pxl;};
+        void printPixel(int x, int y){std::cout<<p[x][y]->getType();};
+        auto getMatrix(char);
+        void addPixel(int x, int y, Pixel pxl){p[x][y] = &pxl;};
         ~Grid(){};
 
 };
 
 Grid::Grid(){
-    rows = M;
-    cols = N;
     for (int i = 0; i < cols; i++) {
         for (int j = 0; j < rows; j++) {
         p[i][j] = &p0;
@@ -37,10 +37,60 @@ Grid::Grid(){
     }
 };
 
+auto Grid::getMatrix(char cell_type){
+    
+    switch (cell_type)
+    {
+    case 'T':
+        for (int i = 0; i < cols; i++) {
+            for (int j = 0; j < rows; j++) {
+                if(cell_type == p[i][j]->getType()){
+                    X[i][j] = p[i][j]->getType();
+                }
+                else{
+                    X[i][j] = 'O';
+                }
+            }
+        }
+        break;
+    case 'E':
+        for (int i = 0; i < cols; i++) {
+            for (int j = 0; j < rows; j++) {
+                if(cell_type == p[i][j]->getType()){
+                    X[i][j] = p[i][j]->getType();
+                }
+                else{
+                    X[i][j] = 'O';
+                }
+            }
+        }
+        break;
+
+    default:
+            for (int i = 0; i < cols; i++) {
+                for (int j = 0; j < rows; j++) {
+                    if(cell_type == p[i][j]->getType()){
+                        X[i][j] = p[i][j]->getType();
+                    }
+                    else{
+                        X[i][j] = 'O';
+                    }
+                }
+            }
+        break;
+    }
+    return X;
+};
+
 int main(){
     Pixel p1('T'), p2('H');
-    Grid g;
-    g.add_pixel(1,1,p1);
-    g.print_pixel(1,1);
+    Grid g; //creamos el grid
+    std::array<std::array<char,rows>,cols> Tmat;
+    g.addPixel(1,1,p1); // introducimos el primer valor
+    
+    Tmat = g.getMatrix('T');
+    std::cout<<"(1,1) = "<<Tmat[1][1]<<std::endl;
+    std::cout<<"(1,2) = "<<Tmat[1][2]<<std::endl;
+
     return 0;
 };
