@@ -4,6 +4,7 @@
 #define M 300
 #define N 300
 // https://processing.org/tutorials/2darray/
+
 class Pixel{
     private:
         char cel_type;
@@ -20,10 +21,9 @@ class Grid{
         Pixel  *p[M][N], p0 = 'R';
     public:
         Grid(); //create the grid
-        Grid(int, int, Pixel); //place the pixel???
-        void print_pixel(int, int);
+        void print_pixel(int x, int y){std::cout<<p[x][y]->getType();};
+        void add_pixel(int x, int y, Pixel pxl){p[x][y] = &pxl;};
         ~Grid(){};
-        // Crear addpixel
 
 };
 
@@ -37,13 +37,10 @@ Grid::Grid(){
     }
 };
 
-void Grid::print_pixel(int x, int y){
-    std::cout<<p[x][y]->getType();
-};
-
 int main(){
-    //Pixel p1('T'), p2('H');
+    Pixel p1('T'), p2('H');
     Grid g;
+    g.add_pixel(1,1,p1);
     g.print_pixel(1,1);
     return 0;
 };
