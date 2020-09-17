@@ -1,6 +1,8 @@
 #include <iostream>
 #include <array>
-
+#include <fstream>
+#include "myfunc.h"
+//#include "fem2D.h"
 #define cols 300
 #define rows 300
 // TODO: display with gnuplot? o Qt?
@@ -83,6 +85,7 @@ auto Grid::getMatrix(char cell_type){
 };
 
 int main(){
+
     std::array<std::array<char,rows>,cols> Tmat, Emat, Hmat;
     Pixel p1('T'), p2('H');
     Grid g; //creamos el grid de pixeles

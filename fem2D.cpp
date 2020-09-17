@@ -5,7 +5,7 @@
 # include <cmath>
 # include <ctime>
 # include <cstring>
-
+//# include "fem2D.hpp"
 using namespace std;
 
 int main ( void );
@@ -23,6 +23,7 @@ void assemble ( int node_num, double node_xy[], int nnodes,
   int ib, double time, double a[], double f[] );
 int bandwidth ( int nnodes, int element_num, int element_node[],
   int node_num );
+void compare ( int node_num, double node_xy[], double time, double u[] );
 int dgb_fa ( int n, int ml, int mu, double a[], int pivot[] );
 void dgb_print_some ( int m, int n, int ml, int mu, double a[], int ilo,
   int jlo, int ihi, int jhi, string title );
@@ -30,6 +31,9 @@ double *dgb_sl ( int n, int ml, int mu, double a[], int pivot[],
   double b[], int job );
 void element_write ( int nnodes, int element_num, int element_node[],
   string triangulation_txt_file_name );
+void errors ( double element_area[], int element_node[], double node_xy[],
+  double u[], int element_num, int nnodes,
+  int node_num, double time, double *el2, double *eh1 );
 void exact_u ( int node_num, double node_xy[], double time, double u_exact[]);
 void filename_inc ( string *file_name );
 void grid_t6 ( int nx, int ny, int nnodes, int element_num, int element_node[] );
@@ -56,7 +60,7 @@ int r8_nint ( double x );
 void r8vec_print_some ( int n, double a[], int i_lo, int i_hi, string title );
 double rhs ( double x, double y, double time );
 int s_len_trim ( string s );
-void solution_write ( int node_num, double u[], string u_file_name ) ;
+void solution_write ( int node_num, double u[], string u_file_name, int node_boundary[] ) ;
 void timestamp ( );
 void triangulation_order6_plot ( string file_name, int node_num, double node_xy[],
   int tri_num, int triangle_node[], int node_show, int triangle_show );
@@ -168,8 +172,8 @@ int main ( void )
 {
 # define NNODES 6 //the number of nodes used to form one element.
 # define QUAD_NUM 3 // the number of quadrature points used for assembly
-# define NX 5 // the number of points in the X direction.
-# define NY 5 // the number of points in the Y direction.
+# define NX 3 // the number of points in the X direction.
+# define NY 3 // the number of points in the Y direction.
 
 # define ELEMENT_NUM ( NX - 1 ) * ( NY - 1 ) * 2 // the number of elements (subrectangles)
 # define NODE_NUM ( 2 * NX - 1 ) * ( 2 * NY - 1 ) //Add extra points for the corners
@@ -242,7 +246,7 @@ int main ( void )
 //  finite element unknown.  Then set the boundary values.
 
   node_boundary = node_boundary_set ( NX, NY, NODE_NUM );
-
+  i4vec_print_some ( NODE_NUM, node_boundary, 25, "  NODE_BOUNDARY:" );
   if ( false )
   {
     i4vec_print_some ( NODE_NUM, node_boundary, 10, "  NODE_BOUNDARY:" );
@@ -304,7 +308,7 @@ int main ( void )
 
   time_unit << "  " << setw(14) << time << "\n";
 
-  solution_write ( NODE_NUM, u, u_file_name );
+  solution_write ( NODE_NUM, u, u_file_name, node_boundary);
 
 //  Time looping.
 
@@ -391,7 +395,7 @@ int main ( void )
 
     filename_inc ( &u_file_name );
 
-    solution_write ( NODE_NUM, u, u_file_name );
+    solution_write ( NODE_NUM, u, u_file_name, node_boundary);
   }
 
 //  Deallocate memory.
@@ -424,6 +428,7 @@ int main ( void )
 # undef QUAD_NUM
 }
 //****************************************************************************80
+
 
 void adjust_backward_euler ( int node_num, double node_xy[], int nnodes,
   int element_num, int element_node[], int quad_num, double wq[],
@@ -3113,7 +3118,7 @@ int s_len_trim ( string s )
 }
 //****************************************************************************80*
 
-void solution_write ( int node_num, double u[], string u_file_name )
+void solution_write ( int node_num, double u[], string u_file_name, int node_boundary[] )
 
 //****************************************************************************80*
 //
@@ -3159,7 +3164,10 @@ void solution_write ( int node_num, double u[], string u_file_name )
 
   for ( node = 0; node < node_num; node++ )
   {
-    u_file << setw(14) << u[node] << "\n";
+    if(node_boundary[node] == 0){
+      u_file << setw(14) << u[node] << "\n"; // MODIFICACION: solo guardamos los nodos internos
+    }
+    
   }
 
   u_file.close ( );
