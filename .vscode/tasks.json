@@ -6,8 +6,10 @@
             "command": "C:\\MinGW\\mingw32\\bin\\g++.exe",
             "args": [
                 "-g",
-                "fem2D.cpp",
-                "femMain.cpp",
+                "MyFun/MyFun.cpp",
+                "Program.cpp",
+                "FEM/fem2D.cpp",
+                //"FEM/femMain.cpp",
                 //"${file}",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
