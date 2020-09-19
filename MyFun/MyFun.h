@@ -2,6 +2,9 @@
 #include <array>
 #include <fstream>
 
+const int NX = 5;
+const int NY = 5;
+
 class Pixel{
     private:
         char cel_type;
@@ -15,12 +18,13 @@ class Pixel{
 
 class Grid{
     private:
-        std::array<std::array<Pixel*,30>,30> p; //mejor usar array que *p[rows][cols]
-        std::array<std::array<Pixel*,30>,30> X;
+
+        std::array<std::array<Pixel*,NX>,NY> p; //mejor usar array que *p[rows][cols]
+        std::array<std::array<Pixel*,NX>,NY> X;
         Pixel  p0;
     public:
         Grid(); //create the grid
-        std::array<std::array<Pixel*,30>,30> getMatrix(char cell_type);
+        std::array<std::array<Pixel*,NX>,NY> getMatrix(char cell_type);
         void printPixel(int x, int y);
         void addPixel(int x, int y, Pixel pxl);
         
