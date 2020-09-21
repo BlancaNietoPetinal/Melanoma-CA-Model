@@ -9,7 +9,6 @@
 using namespace std;
 # include "fem2D.h"
 
-
 void adjust_backward_euler ( int node_num, double node_xy[], int nnodes,
   int element_num, int element_node[], int quad_num, double wq[],
   double xq[], double yq[], double element_area[], int ib, double time,
@@ -145,7 +144,7 @@ void adjust_backward_euler ( int node_num, double node_xy[], int nnodes,
 }
 //****************************************************************************80
 
-void adjust_boundary ( int node_num, double node_xy[], int node_boundary[],
+void adjust_boundary ( int nx, int ny, int node_num, double node_xy[], int node_boundary[],
   int ib, double time, double a[], double f[] )
 
 //****************************************************************************80
@@ -188,7 +187,8 @@ void adjust_boundary ( int node_num, double node_xy[], int node_boundary[],
 //    On output, F has been adjusted for boundary conditions.
 //
 {
-
+  double *dudx_exact;
+  double *dudy_exact;
   int j;
   int jhi;
   int jlo;
@@ -198,8 +198,10 @@ void adjust_boundary ( int node_num, double node_xy[], int node_boundary[],
 //  Get the exact solution at every node.
 //
   u_exact = new double[node_num];
+  dudx_exact = new double[node_num];
+  dudy_exact = new double[node_num];
 
-  exact_u ( node_num, node_xy, time, u_exact);
+  exact_u ( nx, ny, node_num, node_xy, time, u_exact, dudx_exact, dudy_exact );
 
   for ( node = 0; node < node_num; node++ )
   {
@@ -219,6 +221,8 @@ void adjust_boundary ( int node_num, double node_xy[], int node_boundary[],
   }
 
   delete [] u_exact;
+  delete [] dudx_exact;
+  delete [] dudy_exact;
 
   return;
 }
@@ -511,7 +515,80 @@ int bandwidth ( int nnodes, int element_num, int element_node[], int node_num )
 
   return nhba;
 }
+//****************************************************************************80
 
+void compare (int nx, int ny, int node_num, double node_xy[], double time, double u[] )
+
+//****************************************************************************80
+//
+//  Purpose:
+//
+//    COMPARE compares the exact and computed solution at the nodes.
+//
+//  Discussion:
+//
+//    This is a rough comparison, done only at the nodes.  Such a pointwise
+//    comparison is easy, because the value of the finite element
+//    solution is exactly the value of the finite element coefficient
+//    associated with that node.
+//
+//  Licensing:
+//
+//    This code is distributed under the GNU LGPL license.
+//
+//  Modified:
+//
+//    15 April 2006
+//
+//  Author:
+//
+//    C++ version by John Burkardt
+//
+//  Parameters:
+//
+//    Input, int NODE_NUM, the number of nodes.
+//
+//    Input, double NODE_XY[2*NODE_NUM], the nodes.
+//
+//    Input, double TIME, the current time.
+//
+//    Input, double F[NUNK], the solution vector of the finite
+//    element system.
+//
+{
+  double *dudx_exact;
+  double *dudy_exact;
+  int node;
+  double *u_exact;
+
+  u_exact = new double[node_num];
+  dudx_exact = new double[node_num];
+  dudy_exact = new double[node_num];
+
+  exact_u ( nx, ny, node_num, node_xy, time, u_exact, dudx_exact, dudy_exact );
+
+  cout << "\n";
+  cout << "COMPARE:\n";
+  cout << "  Compare computed and exact solutions at the nodes.\n";
+  cout << "\n";
+  cout << "         X           Y          U           U\n";
+  cout << "                              exact       computed\n";
+  cout << "\n";
+
+  for ( node = 0; node < node_num; node++ )
+  {
+    cout << setw(12) << node_xy[0+node*2] << "  "
+         << setw(12) << node_xy[1+node*2] << "  "
+         << setw(12) << u_exact[node]     << "  "
+         << setw(12) << u[node]           << "\n";
+  }
+
+  delete [] u_exact;
+  delete [] dudx_exact;
+  delete [] dudy_exact;
+
+  return;
+}
 //****************************************************************************80
 
 int dgb_fa ( int n, int ml, int mu, double a[], int pivot[] )
@@ -1051,10 +1128,188 @@ void element_write ( int nnodes, int element_num, int element_node[],
 
   return;
 }
+//****************************************************************************80*
 
+void errors ( int nx, int ny, double element_area[], int element_node[], double node_xy[],
+  double u[], int element_num, int nnodes, int node_num, double time,
+  double *el2, double *eh1 )
+
+//****************************************************************************80*
+//
+//  Purpose:
+//
+//    ERRORS calculates the error in the L2 and H1-seminorm.
+//
+//  Discussion:
+//
+//    This routine uses a 13 point quadrature rule in each element,
+//    in order to estimate the values of
+//
+//      EL2 = Sqrt ( Integral ( U(x,y) - Uh(x,y) )**2 dx dy )
+//
+//      EH1 = Sqrt ( Integral ( Ux(x,y) - Uhx(x,y) )**2 +
+//                            ( Uy(x,y) - Uhy(x,y) )**2 dx dy )
+//
+//    Here U is the exact solution, and Ux and Uy its spatial derivatives,
+//    as evaluated by a user-supplied routine.
+//
+//    Uh, Uhx and Uhy are the computed solution and its spatial derivatives,
+//    as specified by the computed finite element solution.
+//
+//  Licensing:
+//
+//    This code is distributed under the GNU LGPL license.
+//
+//  Modified:
+//
+//    16 April 2006
+//
+//  Author:
+//
+//    C++ version by John Burkardt
+//
+//  Parameters:
+//
+//    Input, double ELEMENT_AREA[ELEMENT_NUM], the area of each element.
+//
+//    Input, int ELEMENT_NODE[NNODES*ELEMENT_NUM]; ELEMENT_NODE(I,J) is the global
+//    index of local node I in element J.
+//
+//    Input, double NODE_XY[2*NODE_NUM], the X and Y coordinates of nodes.
+//
+//    Input, double U[NUNK], the coefficients of the solution.
+//
+//    Input, int ELEMENT_NUM, the number of elements.
+//
+//    Input, int NNODES, the number of nodes used to form one element.
+//
+//    Input, int NODE_NUM, the number of nodes.
+//
+//    Input, real ( kind = 8 ) TIME, the current time.
+//
+//    Output, double precision *EL2, the L2 error.
+//
+//    Output, double precision *EH1, the H1 seminorm error.
+//
+//  Local Parameters:
+//
+//    Local, double AR, the weight for a given quadrature point
+//    in a given element.
+//
+//    Local, double BI, DBIDX, DBIDY, a basis function and its first
+//    derivatives evaluated at a particular quadrature point.
+//
+//    Local, double EH1, the H1 seminorm error.
+//
+//    Local, double EL2, the L2 error.
+//
+//    Local, int NQE, the number of points in the quadrature rule.
+//    This is actually fixed at 13.
+//
+//    Local, double UEX, UEXX, UEXY, the exact solution and its first
+//    derivatives evaluated at a particular quadrature point.
+//
+//    Local, double UH, UHX, UHY, the computed solution and its first
+//    derivatives evaluated at a particular quadrature point.
+//
+//    Local, double WQE[NQE], stores the quadrature weights.
+//
+//    Local, double X, Y, the coordinates of a particular
+//    quadrature point.
+//
+//    Local, double XQE[NQE], YQE[NQE], stores the location
+//    of quadrature points in a given element.
+//
+{
+# define NQE 13
+
+  double ar;
+  double bi;
+  double dbidx;
+  double dbidy;
+  double dudx_exact[1];
+  double dudxh;
+  double dudy_exact[1];
+  double dudyh;
+  int element;
+  int i;
+  int in1;
+  int quad;
+  double u_exact[1];
+  double uh;
+  double wqe[NQE];
+  double x;
+  double xqe[NQE];
+  double xy[2];
+  double y;
+  double yqe[NQE];
+
+  *el2 = 0.0;
+  *eh1 = 0.0;
+//
+//  For each element, retrieve the nodes, area, quadrature weights,
+//  and quadrature points.
+//
+  for ( element = 0; element < element_num; element++ )
+  {
+    quad_e ( node_xy, element_node, element, element_num,
+      nnodes, node_num, NQE, wqe, xqe, yqe );
+//
+//  For each quadrature point, evaluate the computed solution and its X and
+//  Y derivatives.
+//
+    for ( quad = 0; quad < NQE; quad++ )
+    {
+      ar = element_area[element] * wqe[quad];
+      x = xqe[quad];
+      y = yqe[quad];
+
+      uh = 0.0;
+      dudxh = 0.0;
+      dudyh = 0.0;
+
+      for ( in1 = 0; in1 < nnodes; in1++ )
+      {
+        i = element_node[in1+element*nnodes];
+
+        qbf ( x, y, element, in1, node_xy,
+          element_node, element_num, nnodes, node_num, &bi, &dbidx, &dbidy );
+
+        uh    = uh    + bi    * u[i];
+        dudxh = dudxh + dbidx * u[i];
+        dudyh = dudyh + dbidy * u[i];
+      }
+//
+//  Evaluate the exact solution and its X and Y derivatives.
+//
+      xy[0] = x;
+      xy[1] = y;
+
+      exact_u ( nx, ny, 1, xy, time, u_exact, dudx_exact, dudy_exact );
+//
+//  Add the weighted value at this quadrature point to the quadrature sum.
+//
+      *el2 = *el2 + ar *   pow ( ( uh    - u_exact[0]  ), 2 );
+
+      *eh1 = *eh1 + ar * ( pow ( ( dudxh - dudx_exact[0] ), 2 )
+                         + pow ( ( dudyh - dudy_exact[0] ), 2 ) );
+    }
+  }
+
+  *el2 = sqrt ( *el2 );
+  *eh1 = sqrt ( *eh1 );
+
+  cout << setw(14) << time
+       << setw(14) << *el2
+       << setw(14) << *eh1 << "\n";
+
+  return;
+# undef NQE
+}
 //****************************************************************************80
 
-void exact_u ( int node_num, double node_xy[], double time, double u[])
+void exact_u ( int nx, int ny, int node_num, double node_xy[], double time, double u[],
+  double dudx[], double dudy[] )
 
 //****************************************************************************80
 //
@@ -1111,18 +1366,44 @@ void exact_u ( int node_num, double node_xy[], double time, double u[])
 {
 # define PI 3.141592653589793
 
-  int node;
   double x;
   double y;
 
-  for ( node = 0; node < node_num; node++ )
+  int i;
+  int j;
+  int node;
+
+  node = 0;
+
+  for ( j = 1; j <= 2 * ny - 1; j++ )
   {
-    x = node_xy[0+node*2];
-    y = node_xy[1+node*2];
-
-    u[node]    =      sin ( PI * x ) * sin ( PI * y ) * exp ( - time );
-
+    for ( i = 1; i <= 2 * nx - 1; i++ )
+    {
+      if ( j == 1 || // arriba
+           j == 2 * ny - 1) //abajo
+           //i == 1 || 
+           //i == 2 * nx - 1 ) 
+      {
+        u[node] = 1;
+      }
+      //if (i == 1 || // derecha
+       //   i == 2 * nx - 1 ){ // izquierda
+        //node_boundary[node] = 1;
+      //}
+      else
+      {
+        u[node] = 0;
+      }
+      x = node_xy[0+node*2];
+      y = node_xy[1+node*2];
+      dudx[node] = PI * cos ( PI * x ) * sin ( PI * y ) * exp ( - time );
+      dudy[node] = PI * sin ( PI * x ) * cos ( PI * y ) * exp ( - time );
+      node = node + 1;
+    }
   }
+
+
+  
 
   return;
 # undef PI
@@ -1589,13 +1870,17 @@ int *node_boundary_set ( int nx, int ny, int node_num )
   {
     for ( i = 1; i <= 2 * nx - 1; i++ )
     {
-      if ( j == 1 ||
-           j == 2 * ny - 1 ||
-           i == 1 ||
-           i == 2 * nx - 1 )
+      if ( j == 1 || // arriba
+           j == 2 * ny - 1) //abajo
+           //i == 1 || 
+           //i == 2 * nx - 1 ) 
       {
         node_boundary[node] = 1;
       }
+      //if (i == 1 || // derecha
+       //   i == 2 * nx - 1 ){ // izquierda
+        //node_boundary[node] = 1;
+      //}
       else
       {
         node_boundary[node] = 0;
@@ -2698,7 +2983,7 @@ int s_len_trim ( string s )
 }
 //****************************************************************************80*
 
-void solution_write ( int node_num, double u[], string u_file_name, int node_boundary[] )
+void solution_write ( int node_num, double u[], string u_file_name )
 
 //****************************************************************************80*
 //
@@ -2744,10 +3029,7 @@ void solution_write ( int node_num, double u[], string u_file_name, int node_bou
 
   for ( node = 0; node < node_num; node++ )
   {
-    if(node_boundary[node] == 0){
-      u_file << setw(14) << u[node] << "\n"; // MODIFICACION: solo guardamos los nodos internos
-    }
-    
+    u_file << setw(14) << u[node] << "\n";
   }
 
   u_file.close ( );

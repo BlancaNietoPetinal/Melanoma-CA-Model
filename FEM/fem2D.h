@@ -12,7 +12,7 @@ void adjust_backward_euler ( int node_num, double node_xy[], int nnodes,
   int element_num, int element_node[], int quad_num, double wq[],
   double xq[], double yq[], double element_area[], int ib, double time,
   double time_step_size, double u_old[], double a[], double f[] );
-void adjust_boundary ( int node_num, double node_xy[], int node_boundary[],
+void adjust_boundary (int nx, int ny, int node_num, double node_xy[], int node_boundary[],
   int ib, double time, double a[], double f[] );
 void area_set ( int node_num, double node_xy[], int nnodes,
   int element_num, int element_node[], double element_area[] );
@@ -22,7 +22,7 @@ void assemble ( int node_num, double node_xy[], int nnodes,
   int ib, double time, double a[], double f[] );
 int bandwidth ( int nnodes, int element_num, int element_node[],
   int node_num );
-void compare ( int node_num, double node_xy[], double time, double u[] );
+void compare ( int nx, int ny, int node_num, double node_xy[], double time, double u[] );
 int dgb_fa ( int n, int ml, int mu, double a[], int pivot[] );
 void dgb_print_some ( int m, int n, int ml, int mu, double a[], int ilo,
   int jlo, int ihi, int jhi, string title );
@@ -30,10 +30,11 @@ double *dgb_sl ( int n, int ml, int mu, double a[], int pivot[],
   double b[], int job );
 void element_write ( int nnodes, int element_num, int element_node[],
   string triangulation_txt_file_name );
-void errors ( double element_area[], int element_node[], double node_xy[],
+void errors ( int nx, int ny, double element_area[], int element_node[], double node_xy[],
   double u[], int element_num, int nnodes,
   int node_num, double time, double *el2, double *eh1 );
-void exact_u ( int node_num, double node_xy[], double time, double u_exact[]);
+void exact_u ( int nx, int ny, int node_num, double node_xy[], double time, double u[],
+  double dudx[], double dudy[] );
 void filename_inc ( string *file_name );
 void grid_t6 ( int nx, int ny, int nnodes, int element_num, int element_node[] );
 int i4_max ( int i1, int i2 );
@@ -59,7 +60,7 @@ int r8_nint ( double x );
 void r8vec_print_some ( int n, double a[], int i_lo, int i_hi, string title );
 double rhs ( double x, double y, double time );
 int s_len_trim ( string s );
-void solution_write ( int node_num, double u[], string u_file_name, int node_boundary[] ) ;
+void solution_write ( int node_num, double u[], string u_file_name );
 void timestamp ( );
 void triangulation_order6_plot ( string file_name, int node_num, double node_xy[],
   int tri_num, int triangle_node[], int node_show, int triangle_show );
