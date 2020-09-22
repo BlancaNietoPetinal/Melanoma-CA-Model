@@ -352,7 +352,7 @@ int main ( void )
         tumor[i] = 1;
     }
 
-    assemble2 ( NODE_NUM, D, node_xy, NNODES,
+    assemble ( NODE_NUM, D, node_xy, NNODES,
       ELEMENT_NUM, element_node, QUAD_NUM,
       wq, xq, yq, element_area, ib, time, a, f, tumor, N_old ); // CALCULO DE A Y F
 

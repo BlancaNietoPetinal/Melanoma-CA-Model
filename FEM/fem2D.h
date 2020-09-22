@@ -17,12 +17,12 @@ void adjust_boundary (int nx, int ny, int node_num, double node_xy[], int node_b
   int ib, double time, double a[], double f[] );
 void area_set ( int node_num, double node_xy[], int nnodes,
   int element_num, int element_node[], double element_area[] );
-void assemble ( int node_num, int coef_diff, double node_xy[], int nnodes,
+/*void assemble ( int node_num, int coef_diff, double node_xy[], int nnodes,
   int element_num, int element_node[], int quad_num,
   double wq[], double xq[], double yq[], double element_area[],
   int ib, double time, double a[], double f[] );
-
-void assemble2 ( int node_num, int coef_diff, double node_xy[], int nnodes,
+*/
+void assemble ( int node_num, int coef_diff, double node_xy[], int nnodes,
   int element_num, int element_node[], int quad_num,
   double wq[], double xq[], double yq[], double element_area[],
   int ib, double time, double a[], double f[], int tumor[], double N[] );
@@ -65,8 +65,8 @@ double r8_max ( double x, double y );
 double r8_min ( double x, double y );
 int r8_nint ( double x );
 void r8vec_print_some ( int n, double a[], int i_lo, int i_hi, string title );
-double rhs ( double x, double y, double time );
-double rhs2 (int a, int b, int T, int N); // a y b son las coordenadas
+// double rhs ( double x, double y, double time );
+double rhs (int a, int b, int T, int N); // a y b son las coordenadas
 int s_len_trim ( string s );
 void solution_write ( int node_num, double u[], string u_file_name );
 void timestamp ( );

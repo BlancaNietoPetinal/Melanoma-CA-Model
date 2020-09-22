@@ -306,7 +306,7 @@ void area_set ( int node_num, double node_xy[], int nnodes,
 }
 //****************************************************************************80*
 
-void assemble ( int node_num, int coef_diff, double node_xy[], int nnodes, int element_num,
+/*void assemble ( int node_num, int coef_diff, double node_xy[], int nnodes, int element_num,
   int element_node[], int quad_num, double wq[], double xq[], double yq[],
   double element_area[], int ib, double time, double a[], double f[] )
 
@@ -458,9 +458,10 @@ void assemble ( int node_num, int coef_diff, double node_xy[], int nnodes, int e
 
   return;
 }
+*/
 
 
-void assemble2 ( int node_num, int coef_diff, double node_xy[], int nnodes, int element_num,
+void assemble ( int node_num, int coef_diff, double node_xy[], int nnodes, int element_num,
   int element_node[], int quad_num, double wq[], double xq[], double yq[],
   double element_area[], int ib, double time, double a[], double f[], int tumor[], double N_old[] )
 // ***************************
@@ -517,7 +518,7 @@ void assemble2 ( int node_num, int coef_diff, double node_xy[], int nnodes, int 
         qbf ( x, y, element, test, node_xy, element_node,
           element_num, nnodes, node_num, &bi, &dbidx, &dbidy );
         
-        f[node] = f[node] + w * rhs2 ( x, y, tumor[node], N_old[node]) * bi;
+        f[node] = f[node] + w * rhs ( x, y, tumor[node], N_old[node]) * bi;
 //
 //  We are about to compute a contribution associated with the
 //  I-th test function and the J-th basis function, and add this
@@ -547,6 +548,7 @@ void assemble2 ( int node_num, int coef_diff, double node_xy[], int nnodes, int 
 
   return;
 }
+
 //****************************************************************************80
 
 int bandwidth ( int nnodes, int element_num, int element_node[], int node_num )
@@ -2974,7 +2976,7 @@ void r8vec_print_some ( int n, double a[], int i_lo, int i_hi, string title )
   return;
 }
 //****************************************************************************80
-
+/*
 double rhs ( double x, double y, double time )
 
 //****************************************************************************80
@@ -3029,11 +3031,12 @@ double rhs ( double x, double y, double time )
   return value;
 # undef PI
 }
+*/
 
-double rhs2 (int x, int y, int T, int N)
+double rhs (int x, int y, int T, int N)
 {
 # define PI 3.141592653589793
-#define K 1
+# define K 1
 
   double ut;
 
