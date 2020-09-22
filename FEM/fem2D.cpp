@@ -133,8 +133,8 @@ void adjust_backward_euler ( int node_num, double node_xy[], int nnodes,
           qbf ( x, y, element, basis, node_xy, element_node,
             element_num, nnodes, node_num, &bj, &dbjdx, &dbjdy );
 
-          a[node-j+2*ib+j*(3*ib+1)] = a[node-j+2*ib+j*(3*ib+1)]
-            + w * bi * bj / time_step_size;
+          a[node-j+2*ib+j*(3*ib+1)] = (a[node-j+2*ib+j*(3*ib+1)]
+            + w * bi * bj / time_step_size );
         }
       }
     }
@@ -306,7 +306,7 @@ void area_set ( int node_num, double node_xy[], int nnodes,
 }
 //****************************************************************************80*
 
-void assemble ( int node_num, double node_xy[], int nnodes, int element_num,
+void assemble ( int node_num, int coef_diff, double node_xy[], int nnodes, int element_num,
   int element_node[], int quad_num, double wq[], double xq[], double yq[],
   double element_area[], int ib, double time, double a[], double f[] )
 
@@ -391,6 +391,98 @@ void assemble ( int node_num, double node_xy[], int nnodes, int element_num,
   double w;
   double x;
   double y;
+
+//
+//  Initialize the arrays to zero.
+//
+  for ( i = 0; i < node_num; i++ )
+  {
+    f[i] = 0.0;
+  }
+
+  for ( j = 0; j < node_num; j++ )
+  {
+    for ( i = 0; i < 3*ib + 1; i++ )
+    {
+      a[i+j*(3*ib+1)] = 0.0;
+    }
+  }
+//
+//  The actual values of A and F are determined by summing up
+//  contributions from all the elements.
+//
+  for ( element = 0; element < element_num; element++ )
+  {
+    for ( quad = 0; quad < quad_num; quad++ )
+    {
+      x = xq[quad+element*quad_num];
+      y = yq[quad+element*quad_num];
+      w = element_area[element] * wq[quad];
+
+      for ( test = 0; test < nnodes; test++ )
+      {
+        node = element_node[test+element*nnodes];
+        //cout<<"NODO:"<<node;
+        qbf ( x, y, element, test, node_xy, element_node,
+          element_num, nnodes, node_num, &bi, &dbidx, &dbidy );
+
+        
+        f[node] = f[node] + w * rhs ( x, y, time ) * bi;
+        //f[node] = f[node] + w * rhs2 ( x, y ) * bi;
+//
+//  We are about to compute a contribution associated with the
+//  I-th test function and the J-th basis function, and add this
+//  to the entry A(I,J).
+//
+//  Because of the compressed storage of the matrix, the element
+//  will actually be stored in A(I-J+2*IB+1,J).
+//
+//  An extra complication: we are storing the array as a vector.
+//
+//  Therefore, we ACTUALLY store the entry in A[I-J+2*IB+1-1 + J * (3*IB+1)];
+//
+        for ( basis = 0; basis < nnodes; basis++ )
+        {
+          j = element_node[basis+element*nnodes];
+
+          qbf ( x, y, element, basis, node_xy, element_node,
+            element_num, nnodes, node_num, &bj, &dbjdx, &dbjdy );
+
+          aij = dbidx * dbjdx + dbidy * dbjdy;
+
+          a[node-j+2*ib+j*(3*ib+1)] = coef_diff*(a[node-j+2*ib+j*(3*ib+1)] + w * aij);
+        }
+      }
+    }
+  }
+
+  return;
+}
+
+
+void assemble2 ( int node_num, int coef_diff, double node_xy[], int nnodes, int element_num,
+  int element_node[], int quad_num, double wq[], double xq[], double yq[],
+  double element_area[], int ib, double time, double a[], double f[], int tumor[], double N_old[] )
+// ***************************
+{
+  double aij;
+  int basis;
+  double bi;
+  double bj;
+  double dbidx;
+  double dbidy;
+  double dbjdx;
+  double dbjdy;
+  int element;
+  int i;
+  int j;
+  int node;
+  int quad;
+  int test;
+  double w;
+  double x;
+  double y;
+
 //
 //  Initialize the arrays to zero.
 //
@@ -424,8 +516,8 @@ void assemble ( int node_num, double node_xy[], int nnodes, int element_num,
 
         qbf ( x, y, element, test, node_xy, element_node,
           element_num, nnodes, node_num, &bi, &dbidx, &dbidy );
-
-        f[node] = f[node] + w * rhs ( x, y, time ) * bi;
+        
+        f[node] = f[node] + w * rhs2 ( x, y, tumor[node], N_old[node]) * bi;
 //
 //  We are about to compute a contribution associated with the
 //  I-th test function and the J-th basis function, and add this
@@ -447,7 +539,7 @@ void assemble ( int node_num, double node_xy[], int nnodes, int element_num,
 
           aij = dbidx * dbjdx + dbidy * dbjdy;
 
-          a[node-j+2*ib+j*(3*ib+1)] = a[node-j+2*ib+j*(3*ib+1)] + w * aij;
+          a[node-j+2*ib+j*(3*ib+1)] = coef_diff*(a[node-j+2*ib+j*(3*ib+1)] + w * aij);
         }
       }
     }
@@ -516,6 +608,7 @@ int bandwidth ( int nnodes, int element_num, int element_node[], int node_num )
   return nhba;
 }
 //****************************************************************************80
+/*
 
 void compare (int nx, int ny, int node_num, double node_xy[], double time, double u[] )
 
@@ -589,6 +682,7 @@ void compare (int nx, int ny, int node_num, double node_xy[], double time, doubl
 
   return;
 }
+*/
 //****************************************************************************80
 
 int dgb_fa ( int n, int ml, int mu, double a[], int pivot[] )
@@ -2242,7 +2336,6 @@ void nodes_write ( int node_num, double node_xy[], string output_filename )
   {
     x = node_xy[0+node*2];
     y = node_xy[1+node*2];
-
     output << setw(8)  << x << "  "
            << setw(8)  << y << "\n";
   }
@@ -2923,18 +3016,36 @@ double rhs ( double x, double y, double time )
 # define PI 3.141592653589793
 
   double ut;
-  double uxx;
-  double uyy;
+  //double uxx;
+  //double uyy;
   double value;
 
   ut =            - sin ( PI * x ) * sin ( PI * y ) * exp ( - time );
-  uxx = - PI * PI * sin ( PI * x ) * sin ( PI * y ) * exp ( - time );
-  uyy = - PI * PI * sin ( PI * x ) * sin ( PI * y ) * exp ( - time );
+  //uxx = - PI * PI * sin ( PI * x ) * sin ( PI * y ) * exp ( - time );
+  //uyy = - PI * PI * sin ( PI * x ) * sin ( PI * y ) * exp ( - time );
 
-  value = ut - uxx - uyy;
+  value = ut; //- uxx - uyy;
 
   return value;
 # undef PI
+}
+
+double rhs2 (int x, int y, int T, int N)
+{
+# define PI 3.141592653589793
+#define K 1
+
+  double ut;
+
+  double value;
+
+  ut = -K*T*N;
+
+  value = ut;
+
+  return value;
+# undef PI
+# undef K
 }
 //****************************************************************************80
 

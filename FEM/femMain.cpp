@@ -8,6 +8,9 @@
 
 using namespace std;
 # include "fem2D.h"
+#include "../MyFun/MyFun.h"
+
+#define D 1
 
 int main ( void )
 
@@ -126,6 +129,7 @@ int main ( void )
   double element_area[ELEMENT_NUM];
   int element_node[NNODES*ELEMENT_NUM];
   double *f;
+  int *tumor;
   int ib;
   int ierr;
   int job;
@@ -148,10 +152,10 @@ int main ( void )
   int triangle_show;
   string triangulation_eps_file_name = "Resultados/rectangle_elements.eps";
   string triangulation_txt_file_name = "Resultados/rectangle_elements.txt";
-  double *u;
-  double *u_exact;
+  double *N;
+  double *N0;
   string u_file_name = "Resultados/rectangle_u0000.txt";
-  double *u_old;
+  double *N_old;
   double wq[QUAD_NUM];
   double xl = 0.0;
   double xq[QUAD_NUM*ELEMENT_NUM];
@@ -285,8 +289,8 @@ int main ( void )
 //  Set time stepping quantities.
 //
   time_init = 0.0;
-  time_final = 0.7;
-  time_step_num = 12;
+  time_final = 1.0;
+  time_step_num = 5;
   time_step_size = ( time_final - time_init ) / ( double ) ( time_step_num );
 //
 //  Allocate space.
@@ -295,19 +299,20 @@ int main ( void )
   dudx_exact = new double[NODE_NUM];
   dudy_exact = new double[NODE_NUM];
   f = new double[NODE_NUM];
+  tumor = new int[NODE_NUM];
   pivot = new int[NODE_NUM];
-  u = new double[NODE_NUM];
-  u_exact = new double[NODE_NUM];
-  u_old = new double[NODE_NUM];
+  N = new double[NODE_NUM];
+  N0 = new double[NODE_NUM];
+  N_old = new double[NODE_NUM];
 //
 //  Set the value of U at the initial time.
 //
   time = time_init;
-  exact_u ( NX, NY, NODE_NUM, node_xy, time, u_exact, dudx_exact, dudy_exact );
+  exact_u ( NX, NY, NODE_NUM, node_xy, time, N0, dudx_exact, dudy_exact );
 
   for ( node = 0; node < NODE_NUM; node++ )
   {
-    u[node] = u_exact[node];
+    N[node] = N0[node];
   }
 
   time_unit.open ( time_file_name.c_str ( ) );
@@ -323,21 +328,18 @@ int main ( void )
 
   time_unit << "  " << setw(14) << time << "\n";
 
-  solution_write ( NODE_NUM, u, u_file_name );
+  solution_write ( NODE_NUM, N, u_file_name );
 //
 //  Time looping.
 //
-  cout << "\n";
-  cout << "     Time        L2 Error       H1 Error\n";
-  cout << "\n";
 
   for ( time_step = 1; time_step <= time_step_num; time_step++ )
   {
     for ( node = 0; node < NODE_NUM; node++ )
     {
-      u_old[node] = u[node];
+      N_old[node] = N[node];
     }
-    delete [] u;
+    delete [] N;
 
     time = ( ( double ) ( time_step_num - time_step ) * time_init
            + ( double ) (                 time_step ) * time_final )
@@ -346,11 +348,14 @@ int main ( void )
 //  Assemble the coefficient matrix A and the right-hand side F of the
 //  finite element equations.
 //
-    assemble ( NODE_NUM, node_xy, NNODES,
+    for (int i = 0; i<NODE_NUM; i++){
+        tumor[i] = 1;
+    }
+
+    assemble2 ( NODE_NUM, D, node_xy, NNODES,
       ELEMENT_NUM, element_node, QUAD_NUM,
-      wq, xq, yq, element_area, ib, time, a, f ); // CALCULO DE A Y F
-      //llama a rhs para calcular f en un tiempo t
-      //aqui deberia ir codigo para ir aumentando T
+      wq, xq, yq, element_area, ib, time, a, f, tumor, N_old ); // CALCULO DE A Y F
+
 
     if ( false )
     {
@@ -366,7 +371,7 @@ int main ( void )
 //
     adjust_backward_euler ( NODE_NUM, node_xy, NNODES, ELEMENT_NUM,
       element_node, QUAD_NUM, wq, xq, yq, element_area, ib, time,
-      time_step_size, u_old, a, f );
+      time_step_size, N_old, a, f );
 
     if ( false )
     {
@@ -407,11 +412,11 @@ int main ( void )
     }
 
     job = 0;
-    u = dgb_sl ( NODE_NUM, ib, ib, a, pivot, f, job );
+    N = dgb_sl ( NODE_NUM, ib, ib, a, pivot, f, job );
 
     if ( false )
     {
-      r8vec_print_some ( NODE_NUM, u, 1, 10,
+      r8vec_print_some ( NODE_NUM, N, 1, 10,
         "  Part of the solution vector:" );
     }
 //
@@ -433,7 +438,7 @@ int main ( void )
 
     filename_inc ( &u_file_name );
 
-    solution_write ( NODE_NUM, u, u_file_name );
+    solution_write ( NODE_NUM, N, u_file_name );
   }
 //
 //  Deallocate memory.
@@ -444,9 +449,9 @@ int main ( void )
   delete [] f;
   delete [] node_boundary;
   delete [] pivot;
-  delete [] u;
-  delete [] u_exact;
-  delete [] u_old;
+  delete [] N;
+  delete [] N0;
+  delete [] N_old;
 
   time_unit.close ( );
 //
