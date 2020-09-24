@@ -1,15 +1,20 @@
 #include <iostream>
 #include <array>
 #include <fstream>
+#include <vector>
 
-const int NX = 5;
-const int NY = 5;
+const int NX = 3;
+const int NY = 3;
 
-void create_vec(int node_num, int mat[]);
+void create_vec(int node_num, int mat[], int value);
 void save_mat(int node_num, int mat[], std::string filename);
-void T_change(int node_num,  double M[], int T[], int D[]);
+void evolve(int node_num, double M[], double N[], int T[], int D[], int H[]);
+void neighbours(int node, int T[], std::vector<int> &neighbour_nodes);
+void free_neighbours(int T[], std::vector<int> &neighbour_nodes, std::vector<int> &free_nodes );
 
-//*********************************
+
+
+/*
 std::array<std::array<float*,NX>,NY> create_N0(float K);
 
 class Pixel{
@@ -38,3 +43,4 @@ class Grid{
         
         ~Grid(){};
 };
+*/
