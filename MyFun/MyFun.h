@@ -2,9 +2,8 @@
 #include <array>
 #include <fstream>
 #include <vector>
-
-const int NX = 3;
-const int NY = 3;
+#include "../constants.hpp"
+using namespace constants;
 
 void create_vec(int node_num, int mat[], int value);
 void save_mat(int node_num, int mat[], std::string filename);

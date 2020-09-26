@@ -6,8 +6,37 @@
 # include <ctime>
 # include <cstring>
 
-using namespace std;
 # include "fem2D.h"
+# include "../MyFun/MyFun.h"
+
+void fem(int node_num,  int quad_num, int coef_diff, double node_xy[], int nnodes,
+  int element_num, int element_node[],
+  double wq[], double xq[], double yq[], double element_area[],
+  int ib, double time, double a[], double f[], int T[], int H[], int E[], double n_old[], double N[],
+  int node_boundary[], double time_step_size, double lambda){
+    int *pivot;
+    pivot = new int[node_num];
+    int ierr;
+    int job;
+    //  Assemble the coefficient matrix A and the right-hand side F.
+        assemble ( node_num, coef_diff, lambda, node_xy, nnodes,
+        element_num, element_node, quad_num,
+        wq, xq, yq, element_area, ib, time, a, f, T, H, E, n_old); // CALCULO DE A Y F
+
+    //  Modify the coefficient matrix and right hand side to account for the dU/dt term
+        adjust_backward_euler ( node_num, node_xy, nnodes, element_num,
+        element_node, quad_num, wq, xq, yq, element_area, ib, time,
+        time_step_size, n_old, a, f );
+
+    //  Modify the coefficient matrix and right hand side to account for
+    //  boundary conditions.
+        adjust_boundary ( NX, NY, node_num, node_xy, node_boundary, ib, time, a, f );
+
+    //  Solve the linear system using a banded solver.
+        ierr = dgb_fa ( node_num, ib, ib, a, pivot );
+        job = 0;
+        N = dgb_sl ( node_num, ib, ib, a, pivot, f, job );
+}
 
 void adjust_backward_euler ( int node_num, double node_xy[], int nnodes,
   int element_num, int element_node[], int quad_num, double wq[],
@@ -187,8 +216,6 @@ void adjust_boundary ( int nx, int ny, int node_num, double node_xy[], int node_
 //    On output, F has been adjusted for boundary conditions.
 //
 {
-  double *dudx_exact;
-  double *dudy_exact;
   int j;
   int jhi;
   int jlo;
@@ -198,10 +225,8 @@ void adjust_boundary ( int nx, int ny, int node_num, double node_xy[], int node_
 //  Get the exact solution at every node.
 //
   u_exact = new double[node_num];
-  dudx_exact = new double[node_num];
-  dudy_exact = new double[node_num];
 
-  exact_u ( nx, ny, node_num, node_xy, time, u_exact, dudx_exact, dudy_exact );
+  initial_nutrients ( nx, ny, node_num, node_xy, time, u_exact);
 
   for ( node = 0; node < node_num; node++ )
   {
@@ -221,8 +246,6 @@ void adjust_boundary ( int nx, int ny, int node_num, double node_xy[], int node_
   }
 
   delete [] u_exact;
-  delete [] dudx_exact;
-  delete [] dudy_exact;
 
   return;
 }
@@ -422,7 +445,7 @@ void area_set ( int node_num, double node_xy[], int nnodes,
       for ( test = 0; test < nnodes; test++ )
       {
         node = element_node[test+element*nnodes];
-        //cout<<"NODO:"<<node;
+        //std::cout<<"NODO:"<<node;
         qbf ( x, y, element, test, node_xy, element_node,
           element_num, nnodes, node_num, &bi, &dbidx, &dbidy );
 
@@ -461,9 +484,10 @@ void area_set ( int node_num, double node_xy[], int nnodes,
 */
 
 
-void assemble ( int node_num, int coef_diff, double node_xy[], int nnodes, int element_num,
+void assemble ( int node_num, int coef_diff, double lambda, double node_xy[], int nnodes, int element_num,
   int element_node[], int quad_num, double wq[], double xq[], double yq[],
-  double element_area[], int ib, double time, double a[], double f[], int tumor[], double N_old[] )
+  double element_area[], int ib, double time, double a[], double f[], int T[],int H[], int E[],
+  double N_old[])
 // ***************************
 {
   double aij;
@@ -518,7 +542,7 @@ void assemble ( int node_num, int coef_diff, double node_xy[], int nnodes, int e
         qbf ( x, y, element, test, node_xy, element_node,
           element_num, nnodes, node_num, &bi, &dbidx, &dbidy );
         
-        f[node] = f[node] + w * rhs ( x, y, tumor[node], N_old[node]) * bi;
+        f[node] = f[node] + w * rhs ( x, y, T[node], H[node], E[node], N_old[node], lambda) * bi;
 //
 //  We are about to compute a contribution associated with the
 //  I-th test function and the J-th basis function, and add this
@@ -609,82 +633,6 @@ int bandwidth ( int nnodes, int element_num, int element_node[], int node_num )
 
   return nhba;
 }
-//****************************************************************************80
-/*
-
-void compare (int nx, int ny, int node_num, double node_xy[], double time, double u[] )
-
-//****************************************************************************80
-//
-//  Purpose:
-//
-//    COMPARE compares the exact and computed solution at the nodes.
-//
-//  Discussion:
-//
-//    This is a rough comparison, done only at the nodes.  Such a pointwise
-//    comparison is easy, because the value of the finite element
-//    solution is exactly the value of the finite element coefficient
-//    associated with that node.
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license.
-//
-//  Modified:
-//
-//    15 April 2006
-//
-//  Author:
-//
-//    C++ version by John Burkardt
-//
-//  Parameters:
-//
-//    Input, int NODE_NUM, the number of nodes.
-//
-//    Input, double NODE_XY[2*NODE_NUM], the nodes.
-//
-//    Input, double TIME, the current time.
-//
-//    Input, double F[NUNK], the solution vector of the finite
-//    element system.
-//
-{
-  double *dudx_exact;
-  double *dudy_exact;
-  int node;
-  double *u_exact;
-
-  u_exact = new double[node_num];
-  dudx_exact = new double[node_num];
-  dudy_exact = new double[node_num];
-
-  exact_u ( nx, ny, node_num, node_xy, time, u_exact, dudx_exact, dudy_exact );
-
-  cout << "\n";
-  cout << "COMPARE:\n";
-  cout << "  Compare computed and exact solutions at the nodes.\n";
-  cout << "\n";
-  cout << "         X           Y          U           U\n";
-  cout << "                              exact       computed\n";
-  cout << "\n";
-
-  for ( node = 0; node < node_num; node++ )
-  {
-    cout << setw(12) << node_xy[0+node*2] << "  "
-         << setw(12) << node_xy[1+node*2] << "  "
-         << setw(12) << u_exact[node]     << "  "
-         << setw(12) << u[node]           << "\n";
-  }
-
-  delete [] u_exact;
-  delete [] dudx_exact;
-  delete [] dudy_exact;
-
-  return;
-}
-*/
 //****************************************************************************80
 
 int dgb_fa ( int n, int ml, int mu, double a[], int pivot[] )
@@ -812,9 +760,9 @@ int dgb_fa ( int n, int ml, int mu, double a[], int pivot[] )
 //
     if ( a[l-1+(k-1)*col] == 0.0 )
     {
-      cout << "\n";
-      cout << "DGB_FA - Fatal error!\n";
-      cout << "  Zero pivot on step " << k << "\n";
+      std::cout << "\n";
+      std::cout << "DGB_FA - Fatal error!\n";
+      std::cout << "  Zero pivot on step " << k << "\n";
       return k;
     }
 //
@@ -860,9 +808,9 @@ int dgb_fa ( int n, int ml, int mu, double a[], int pivot[] )
 
   if ( a[m-1+(n-1)*col] == 0.0 )
   {
-    cout << "\n";
-    cout << "DGB_FA - Fatal error!\n";
-    cout << "  Zero pivot on step " << n << "\n";
+    std::cout << "\n";
+    std::cout << "DGB_FA - Fatal error!\n";
+    std::cout << "  Zero pivot on step " << n << "\n";
     return n;
   }
 
@@ -935,8 +883,8 @@ void dgb_print_some ( int m, int n, int ml, int mu, double a[], int ilo,
 
   if ( 0 < s_len_trim ( title ) )
   {
-    cout << "\n";
-    cout << title << "\n";
+    std::cout << "\n";
+    std::cout << title << "\n";
   }
 //
 //  Print the columns of the matrix, in strips of 5.
@@ -947,15 +895,15 @@ void dgb_print_some ( int m, int n, int ml, int mu, double a[], int ilo,
     j2hi = i4_min ( j2hi, n );
     j2hi = i4_min ( j2hi, jhi );
 
-    cout << "\n";
-    cout << "  Col: ";
+    std::cout << "\n";
+    std::cout << "  Col: ";
     for ( j = j2lo; j <= j2hi; j++ )
     {
-      cout << setw(7) << j << "       ";
+      std::cout << setw(7) << j << "       ";
     }
-    cout << "\n";
-    cout << "  Row\n";
-    cout << "  ---\n";
+    std::cout << "\n";
+    std::cout << "  Row\n";
+    std::cout << "  ---\n";
 //
 //  Determine the range of the rows in this strip.
 //
@@ -970,23 +918,23 @@ void dgb_print_some ( int m, int n, int ml, int mu, double a[], int ilo,
 //
 //  Print out (up to) 5 entries in row I, that lie in the current strip.
 //
-      cout << setw(6) << i << "  ";
+      std::cout << setw(6) << i << "  ";
       for ( j = j2lo; j <= j2hi; j++ )
       {
         if ( ml < i-j || mu < j-i )
         {
-          cout << "            ";
+          std::cout << "            ";
         }
         else
         {
-          cout << setw(10) << a[i-j+ml+mu+(j-1)*col] << "  ";
+          std::cout << setw(10) << a[i-j+ml+mu+(j-1)*col] << "  ";
         }
       }
-      cout << "\n";
+      std::cout << "\n";
     }
   }
 
-  cout << "\n";
+  std::cout << "\n";
 
   return;
 # undef INCX
@@ -1158,6 +1106,12 @@ double *dgb_sl ( int n, int ml, int mu, double a[], int pivot[],
       }
     }
   }
+  for(int i = 0; i<n ; i++){
+    if(x[i]<0){ //ANADIDO POR BLANCA
+      x[i] = 0;
+    }
+  }
+
 
   return x;
 }
@@ -1205,9 +1159,9 @@ void element_write ( int nnodes, int element_num, int element_node[],
 
   if ( !output )
   {
-    cout << "\n";
-    cout << "ELEMENT_WRITE - Warning!\n";
-    cout << "  Could not write the node file.\n";
+    std::cout << "\n";
+    std::cout << "ELEMENT_WRITE - Warning!\n";
+    std::cout << "  Could not write the node file.\n";
     return;
   }
 
@@ -1225,7 +1179,7 @@ void element_write ( int nnodes, int element_num, int element_node[],
   return;
 }
 //****************************************************************************80*
-
+/*
 void errors ( int nx, int ny, double element_area[], int element_node[], double node_xy[],
   double u[], int element_num, int nnodes, int node_num, double time,
   double *el2, double *eh1 )
@@ -1381,7 +1335,7 @@ void errors ( int nx, int ny, double element_area[], int element_node[], double 
       xy[0] = x;
       xy[1] = y;
 
-      exact_u ( nx, ny, 1, xy, time, u_exact, dudx_exact, dudy_exact );
+      initial_nutrients ( nx, ny, 1, xy, time, u_exact, dudx_exact, dudy_exact );
 //
 //  Add the weighted value at this quadrature point to the quadrature sum.
 //
@@ -1395,23 +1349,23 @@ void errors ( int nx, int ny, double element_area[], int element_node[], double 
   *el2 = sqrt ( *el2 );
   *eh1 = sqrt ( *eh1 );
 
-  cout << setw(14) << time
+  std::cout << setw(14) << time
        << setw(14) << *el2
        << setw(14) << *eh1 << "\n";
 
   return;
 # undef NQE
 }
+*/
 //****************************************************************************80
 
-void exact_u ( int nx, int ny, int node_num, double node_xy[], double time, double u[],
-  double dudx[], double dudy[] )
+void initial_nutrients ( int nx, int ny, int node_num, double node_xy[], double time, double u[])
 
 //****************************************************************************80
 //
 //  Purpose:
 //
-//    EXACT_U calculates the exact solution and its first derivatives.
+//    initial_nutrients calculates the exact solution and its first derivatives.
 //
 //  Discussion:
 //
@@ -1480,7 +1434,7 @@ void exact_u ( int nx, int ny, int node_num, double node_xy[], double time, doub
            //i == 1 || 
            //i == 2 * nx - 1 ) 
       {
-        u[node] = 1;
+        u[node] = 30;
       }
       //if (i == 1 || // derecha
        //   i == 2 * nx - 1 ){ // izquierda
@@ -1492,8 +1446,6 @@ void exact_u ( int nx, int ny, int node_num, double node_xy[], double time, doub
       }
       x = node_xy[0+node*2];
       y = node_xy[1+node*2];
-      dudx[node] = PI * cos ( PI * x ) * sin ( PI * y ) * exp ( - time );
-      dudy[node] = PI * sin ( PI * x ) * cos ( PI * y ) * exp ( - time );
       node = node + 1;
     }
   }
@@ -1864,16 +1816,16 @@ void i4vec_print_some ( int n, int a[], int max_print, string title )
 
   if ( 0 < s_len_trim ( title ) )
   {
-    cout << "\n";
-    cout << title << "\n";
-    cout << "\n";
+    std::cout << "\n";
+    std::cout << title << "\n";
+    std::cout << "\n";
   }
 
   if ( n <= max_print )
   {
     for ( i = 0; i < n; i++ )
     {
-      cout << setw(6)  << i + 1 << "  "
+      std::cout << setw(6)  << i + 1 << "  "
            << setw(10) << a[i] << "\n";
     }
   }
@@ -1881,23 +1833,23 @@ void i4vec_print_some ( int n, int a[], int max_print, string title )
   {
     for ( i = 0; i < max_print-2; i++ )
     {
-      cout << setw(6)  << i + 1 << "  "
+      std::cout << setw(6)  << i + 1 << "  "
            << setw(10) << a[i]  << "\n";
     }
-    cout << "......  ..............\n";
+    std::cout << "......  ..............\n";
     i = n - 1;
-    cout << setw(6)  << i + 1 << "  "
+    std::cout << setw(6)  << i + 1 << "  "
          << setw(10) << a[i]  << "\n";
   }
   else
   {
     for ( i = 0; i < max_print-1; i++ )
     {
-      cout << setw(6)  << i + 1 << "  "
+      std::cout << setw(6)  << i + 1 << "  "
            << setw(10) << a[i]  << "\n";
     }
     i = max_print - 1;
-    cout << setw(6)  << i + 1 << "  "
+    std::cout << setw(6)  << i + 1 << "  "
          << setw(10) << a[i]  << "...more entries...\n";
   }
 
@@ -2121,9 +2073,9 @@ void nodes_plot ( string file_name, int node_num, double node_xy[],
 
   if ( !file_unit )
   {
-    cout << "\n";
-    cout << "POINTS_PLOT - Fatal error!\n";
-    cout << "  Could not open the output EPS file.\n";
+    std::cout << "\n";
+    std::cout << "POINTS_PLOT - Fatal error!\n";
+    std::cout << "  Could not open the output EPS file.\n";
     exit ( 1 );
   }
 
@@ -2328,9 +2280,9 @@ void nodes_write ( int node_num, double node_xy[], string output_filename )
 
   if ( !output )
   {
-    cout << "\n";
-    cout << "NODES_WRITE - Warning!\n";
-    cout << "  Could not write the node file.\n";
+    std::cout << "\n";
+    std::cout << "NODES_WRITE - Warning!\n";
+    std::cout << "  Could not write the node file.\n";
     return;
   }
 
@@ -2533,9 +2485,9 @@ void qbf ( double x, double y, int element, int inode, double node_xy[],
   }
   else
   {
-    cout << "\n";
-    cout << "QBF - Fatal error!\n";
-    cout << "  Request for local basis function INODE = " << inode << "\n";
+    std::cout << "\n";
+    std::cout << "QBF - Fatal error!\n";
+    std::cout << "  Request for local basis function INODE = " << inode << "\n";
     exit ( 1 );
   }
 //
@@ -2962,14 +2914,14 @@ void r8vec_print_some ( int n, double a[], int i_lo, int i_hi, string title )
 
   if ( 0 < s_len_trim ( title ) )
   {
-    cout << "\n";
-    cout << title << "\n";
+    std::cout << "\n";
+    std::cout << title << "\n";
   }
 
-  cout << "\n";
+  std::cout << "\n";
   for ( i = i4_max ( 1, i_lo ); i <= i4_min ( n, i_hi ); i++ )
   {
-    cout << "  " << setw(8)  << i       << "  "
+    std::cout << "  " << setw(8)  << i       << "  "
          << "  " << setw(14) << a[i-1]  << "\n";
   }
 
@@ -3033,22 +2985,23 @@ double rhs ( double x, double y, double time )
 }
 */
 
-double rhs (int x, int y, int T, int N)
+double rhs (int x, int y, int T, int H, int E, int N, double L)
 {
-# define PI 3.141592653589793
-# define K 1
+# define K 0.5
+# define K1 K*L
 
   double ut;
 
   double value;
 
-  ut = -K*T*N;
+  ut = -K1*N*T -K*N*H -K*N*E;  //MODIFICAR Y VER COMO SALE EL TUMOR
 
   value = ut;
 
   return value;
-# undef PI
+
 # undef K
+# undef K1
 }
 //****************************************************************************80
 
@@ -3134,9 +3087,9 @@ void solution_write ( int node_num, double u[], string u_file_name )
 
   if ( !u_file )
   {
-    cout << "\n";
-    cout << "SOLUTION_WRITE - Warning!\n";
-    cout << "  Could not write the solution file \""
+    std::cout << "\n";
+    std::cout << "SOLUTION_WRITE - Warning!\n";
+    std::cout << "  Could not write the solution file \""
          << u_file_name << "\".\n";
     return;
   }
@@ -3192,7 +3145,7 @@ void timestamp ( void )
 
   strftime ( time_buffer, TIME_SIZE, "%d %B %Y %I:%M:%S %p", tm );
 
-  cout << time_buffer << "\n";
+  std::cout << time_buffer << "\n";
 
   return;
 # undef TIME_SIZE
@@ -3361,9 +3314,9 @@ void triangulation_order6_plot ( string file_name, int node_num, double node_xy[
 
   if ( !file_unit )
   {
-    cout << "\n";
-    cout << "TRIANGULATION_ORDER6_PLOT - Fatal error!\n";
-    cout << "  Could not open the output EPS file.\n";
+    std::cout << "\n";
+    std::cout << "TRIANGULATION_ORDER6_PLOT - Fatal error!\n";
+    std::cout << "  Could not open the output EPS file.\n";
     exit ( 1 );
   }
 

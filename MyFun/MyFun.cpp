@@ -2,6 +2,7 @@
 #include <array>
 #include <fstream>
 #include <random>
+#include <time.h>
 #include "MyFun.h"
 
 void save_mat(int node_num, int mat[], std::string filename){
@@ -92,27 +93,25 @@ void neighbours(int node, int T[], std::vector<int> &neighbour_nodes){ // MEJORA
     }
     return;
 };
-
 void evolve(int node_num, double M[], double N[], int T[], int D[], int H[]){  
     //REVISAR: hace falta inicializarlo siempre o se puede poner fuera??
     std::default_random_engine generator;
-    std::normal_distribution<double> distribution(0.5,0.5); //DUDA: que valores meto aqui??
+    std::normal_distribution<double> distribution(0.5,0.3); //DUDA: que valores meto aqui??
     float P;
-    float ThNec = 2.0, ThMig = 2.0, ThDiv = 2.0; // CAMBIAR: buscar el valor real del param
+    float ThNec = 0, ThMig = 15.0, ThDiv = 1.0; // CAMBIAR: buscar el valor real del param
     int neighbour_node, dice, index;
     double rnd_n;
     std::vector<int> neighbour_nodes, free_nodes;
-    
+    std::srand(time(0));
     for(int node = 0; node < node_num; node++) // iteramos en cada pixel
     {
         if(T[node] >= 1){
-            //rnd_n = distribution(generator);
-            //dice = (rand() % 2);
-            rnd_n = -1;
-            dice = 3;
+            rnd_n = distribution(generator);
+            dice = (rand() % 3) + 1;
             switch (dice)  // hacer una funcion por cada caso?
             {
             case 1: // NECROSIS  
+                //std::cout<<"NECROSIS"<<std::endl;
                 P = exp(- pow((M[node]/T[node]),2)/pow(ThNec,2));
                 if( (P>rnd_n) && (D[node] == 0) && (T[node] != 0) ){ // hay cel tumoral + no hay cel necrosada
                     T[node] = T[node] - 1;
@@ -123,6 +122,7 @@ void evolve(int node_num, double M[], double N[], int T[], int D[], int H[]){
                 break;
 
             case 2: // MIGRACION
+                //std::cout<<"MIGRACION"<<std::endl;
                 //std::cout<<"El dado es: "<<dice<<" hay migracion"<<std::endl;
                 P = 1 - exp( - pow((sqrt(T[node]) * M[node]),2) / pow(ThMig,2));
                 neighbours(node, T, neighbour_nodes);
@@ -166,6 +166,7 @@ void evolve(int node_num, double M[], double N[], int T[], int D[], int H[]){
                 break;
 
             case 3: // DIVISION
+                //std::cout<<"DIVISION"<<std::endl;
                 P = exp( 1 - pow(N[node]/T[node], 2)/ pow(ThDiv,2) );
                 if(P>rnd_n){
                     neighbours(node, T, neighbour_nodes);
@@ -177,8 +178,6 @@ void evolve(int node_num, double M[], double N[], int T[], int D[], int H[]){
                     else{
                         index = rand() % free_nodes.size(); //pick randomly
                         neighbour_node = free_nodes[index];
-                        std::cout<<"Nodo: "<<node<<std::endl;
-                        std::cout<<"Nodo vecino: "<<neighbour_node<<std::endl;
                         T[neighbour_node] = 1;
                         if(H[neighbour_node] == 1){
                             H[neighbour_node] = 0;
@@ -188,8 +187,6 @@ void evolve(int node_num, double M[], double N[], int T[], int D[], int H[]){
                         }
                     }
                 }
-                std::cout<<"H: "<<H[node]<<" T:"<<T[node]<<std::endl;
-                std::cout<<"H vecino: "<<H[neighbour_node]<<" T vecino:"<<T[neighbour_node]<<std::endl;
                 break;
             } 
         }
@@ -197,7 +194,6 @@ void evolve(int node_num, double M[], double N[], int T[], int D[], int H[]){
         neighbour_nodes.clear();
     }    
 }
-
 void create_vec(int node_num, int mat[], int value){
     for (int i = 0; i<node_num; i++) 
     {

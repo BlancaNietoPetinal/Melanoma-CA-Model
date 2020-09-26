@@ -5,10 +5,16 @@
 # include <cmath>
 # include <ctime>
 # include <cstring>
-
-
+#include "../constants.hpp"
 using namespace std;
+using namespace constants;
 
+void fem(int node_num,  int quad_num, int coef_diff, double node_xy[], int nnodes,
+  int element_num, int element_node[],
+  double wq[], double xq[], double yq[], double element_area[],
+  int ib, double time, double a[], double f[], int T[], int H[], int E[], double n_old[], double N[],
+  int node_boundary[], double time_step_size, double lambda);
+  
 void adjust_backward_euler ( int node_num, double node_xy[], int nnodes,
   int element_num, int element_node[], int quad_num, double wq[],
   double xq[], double yq[], double element_area[], int ib, double time,
@@ -22,10 +28,11 @@ void area_set ( int node_num, double node_xy[], int nnodes,
   double wq[], double xq[], double yq[], double element_area[],
   int ib, double time, double a[], double f[] );
 */
-void assemble ( int node_num, int coef_diff, double node_xy[], int nnodes,
+void assemble ( int node_num, int coef_diff, double lambda, double node_xy[], int nnodes,
   int element_num, int element_node[], int quad_num,
   double wq[], double xq[], double yq[], double element_area[],
-  int ib, double time, double a[], double f[], int tumor[], double N[] );
+  int ib, double time, double a[], double f[], int T[], int H[], int E[],
+  double N_old[]);
 
 int bandwidth ( int nnodes, int element_num, int element_node[],
   int node_num );
@@ -40,8 +47,7 @@ void element_write ( int nnodes, int element_num, int element_node[],
 void errors ( int nx, int ny, double element_area[], int element_node[], double node_xy[],
   double u[], int element_num, int nnodes,
   int node_num, double time, double *el2, double *eh1 );
-void exact_u ( int nx, int ny, int node_num, double node_xy[], double time, double u[],
-  double dudx[], double dudy[] );
+void initial_nutrients ( int nx, int ny, int node_num, double node_xy[], double time, double u[]);
 void filename_inc ( string *file_name );
 void grid_t6 ( int nx, int ny, int nnodes, int element_num, int element_node[] );
 int i4_max ( int i1, int i2 );
@@ -66,7 +72,7 @@ double r8_min ( double x, double y );
 int r8_nint ( double x );
 void r8vec_print_some ( int n, double a[], int i_lo, int i_hi, string title );
 // double rhs ( double x, double y, double time );
-double rhs (int a, int b, int T, int N); // a y b son las coordenadas
+double rhs (int x, int y, int T, int H, int E, int N, double L); // a y b son las coordenadas
 int s_len_trim ( string s );
 void solution_write ( int node_num, double u[], string u_file_name );
 void timestamp ( );

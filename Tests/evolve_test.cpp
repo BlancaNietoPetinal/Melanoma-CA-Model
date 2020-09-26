@@ -27,22 +27,20 @@ int main() {
     create_nutrients(NODE_NUM, N, 3);
     create_nutrients(NODE_NUM, M, 1);
 
-    T[0] = 1; // iniciar con una celula tumoral
+    T[45000] = 1; // iniciar con una celula tumoral
+    H[45000] = 0; // iniciar con una celula tumoral
 
-    H[0] = 0; // iniciar con una celula tumoral
+    for(int i = 0; i<120; i++){
+        //std::cout<<"Iteracion numero "<<i<<std::endl;
+        evolve(NODE_NUM, M, N, T, D, H);
+        if(i%10==0){
+            save_mat(NODE_NUM, T, "Tests/evolve_resultados/Tumor-"+std::to_string(i)+".txt");
+            //save_mat(NODE_NUM, H, "Tests/evolve_results/Health-"+std::to_string(i)+".txt");
+            save_mat(NODE_NUM, D, "Tests/evolve_resultados/Dead-"+std::to_string(i)+".txt");
+        }
 
-
-    
-
-    save_mat(NODE_NUM, T, "Tests/evolve_results/BTumormat.txt");
-    save_mat(NODE_NUM, H, "Tests/evolve_results/BHealthmat.txt");
-    save_mat(NODE_NUM, D, "Tests/evolve_results/BDeathmat.txt");
-
-    evolve(NODE_NUM, M, N, T, D, H);
-
-    save_mat(NODE_NUM, T, "Tests/evolve_results/ATumormat.txt");
-    save_mat(NODE_NUM, H, "Tests/evolve_results/AHealthmat.txt");
-    save_mat(NODE_NUM, D, "Tests/evolve_results/ADeathmat.txt");
+    }
+    //save_mat(NODE_NUM, T, "Tests/evolve_resultados/Tumor.txt");
 
     delete [] M;
     delete [] N;
@@ -59,7 +57,7 @@ void create_nutrients(int nn, double mat[], int value){
             mat[i] = value;
         }
         else{
-            mat[i] = 0;
+            mat[i] = 1;
         }
 
     }
