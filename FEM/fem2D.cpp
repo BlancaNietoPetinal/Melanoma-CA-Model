@@ -1,42 +1,9 @@
-# include <cstdlib>
 # include <iostream>
 # include <iomanip>
 # include <fstream>
 # include <cmath>
-# include <ctime>
 # include <cstring>
-
 # include "fem2D.h"
-# include "../MyFun/MyFun.h"
-
-void fem(int node_num,  int quad_num, int coef_diff, double node_xy[], int nnodes,
-  int element_num, int element_node[],
-  double wq[], double xq[], double yq[], double element_area[],
-  int ib, double time, double a[], double f[], int T[], int H[], int E[], double n_old[], double N[],
-  int node_boundary[], double time_step_size, double lambda){
-    int *pivot;
-    pivot = new int[node_num];
-    int ierr;
-    int job;
-    //  Assemble the coefficient matrix A and the right-hand side F.
-        assemble ( node_num, coef_diff, lambda, node_xy, nnodes,
-        element_num, element_node, quad_num,
-        wq, xq, yq, element_area, ib, time, a, f, T, H, E, n_old); // CALCULO DE A Y F
-
-    //  Modify the coefficient matrix and right hand side to account for the dU/dt term
-        adjust_backward_euler ( node_num, node_xy, nnodes, element_num,
-        element_node, quad_num, wq, xq, yq, element_area, ib, time,
-        time_step_size, n_old, a, f );
-
-    //  Modify the coefficient matrix and right hand side to account for
-    //  boundary conditions.
-        adjust_boundary ( NX, NY, node_num, node_xy, node_boundary, ib, time, a, f );
-
-    //  Solve the linear system using a banded solver.
-        ierr = dgb_fa ( node_num, ib, ib, a, pivot );
-        job = 0;
-        N = dgb_sl ( node_num, ib, ib, a, pivot, f, job );
-}
 
 void adjust_backward_euler ( int node_num, double node_xy[], int nnodes,
   int element_num, int element_node[], int quad_num, double wq[],
@@ -162,8 +129,8 @@ void adjust_backward_euler ( int node_num, double node_xy[], int nnodes,
           qbf ( x, y, element, basis, node_xy, element_node,
             element_num, nnodes, node_num, &bj, &dbjdx, &dbjdy );
 
-          a[node-j+2*ib+j*(3*ib+1)] = (a[node-j+2*ib+j*(3*ib+1)]
-            + w * bi * bj / time_step_size );
+          a[node-j+2*ib+j*(3*ib+1)] = a[node-j+2*ib+j*(3*ib+1)]
+            + w * bi * bj / time_step_size;
         }
       }
     }
@@ -173,8 +140,8 @@ void adjust_backward_euler ( int node_num, double node_xy[], int nnodes,
 }
 //****************************************************************************80
 
-void adjust_boundary ( int nx, int ny, int node_num, double node_xy[], int node_boundary[],
-  int ib, double time, double a[], double f[] )
+void adjust_boundary ( int node_num, double node_xy[], int node_boundary[],
+  int ib, double time, double a[], double f[], int nx, int ny )
 
 //****************************************************************************80
 //
@@ -226,7 +193,7 @@ void adjust_boundary ( int nx, int ny, int node_num, double node_xy[], int node_
 //
   u_exact = new double[node_num];
 
-  initial_nutrients ( nx, ny, node_num, node_xy, time, u_exact);
+  initial_nutrients ( node_num, node_xy, time, u_exact, nx, ny);
 
   for ( node = 0; node < node_num; node++ )
   {
@@ -329,9 +296,10 @@ void area_set ( int node_num, double node_xy[], int nnodes,
 }
 //****************************************************************************80*
 
-/*void assemble ( int node_num, int coef_diff, double node_xy[], int nnodes, int element_num,
+void assemble ( int node_num, double node_xy[], int nnodes, int element_num,
   int element_node[], int quad_num, double wq[], double xq[], double yq[],
-  double element_area[], int ib, double time, double a[], double f[] )
+  double element_area[], int ib, double time, double a[], double f[],
+  double u_old[], int T[], int H[], float K, float lambda, double DIFF )
 
 //****************************************************************************80*
 //
@@ -414,100 +382,6 @@ void area_set ( int node_num, double node_xy[], int nnodes,
   double w;
   double x;
   double y;
-
-//
-//  Initialize the arrays to zero.
-//
-  for ( i = 0; i < node_num; i++ )
-  {
-    f[i] = 0.0;
-  }
-
-  for ( j = 0; j < node_num; j++ )
-  {
-    for ( i = 0; i < 3*ib + 1; i++ )
-    {
-      a[i+j*(3*ib+1)] = 0.0;
-    }
-  }
-//
-//  The actual values of A and F are determined by summing up
-//  contributions from all the elements.
-//
-  for ( element = 0; element < element_num; element++ )
-  {
-    for ( quad = 0; quad < quad_num; quad++ )
-    {
-      x = xq[quad+element*quad_num];
-      y = yq[quad+element*quad_num];
-      w = element_area[element] * wq[quad];
-
-      for ( test = 0; test < nnodes; test++ )
-      {
-        node = element_node[test+element*nnodes];
-        //std::cout<<"NODO:"<<node;
-        qbf ( x, y, element, test, node_xy, element_node,
-          element_num, nnodes, node_num, &bi, &dbidx, &dbidy );
-
-        
-        f[node] = f[node] + w * rhs ( x, y, time ) * bi;
-        //f[node] = f[node] + w * rhs2 ( x, y ) * bi;
-//
-//  We are about to compute a contribution associated with the
-//  I-th test function and the J-th basis function, and add this
-//  to the entry A(I,J).
-//
-//  Because of the compressed storage of the matrix, the element
-//  will actually be stored in A(I-J+2*IB+1,J).
-//
-//  An extra complication: we are storing the array as a vector.
-//
-//  Therefore, we ACTUALLY store the entry in A[I-J+2*IB+1-1 + J * (3*IB+1)];
-//
-        for ( basis = 0; basis < nnodes; basis++ )
-        {
-          j = element_node[basis+element*nnodes];
-
-          qbf ( x, y, element, basis, node_xy, element_node,
-            element_num, nnodes, node_num, &bj, &dbjdx, &dbjdy );
-
-          aij = dbidx * dbjdx + dbidy * dbjdy;
-
-          a[node-j+2*ib+j*(3*ib+1)] = coef_diff*(a[node-j+2*ib+j*(3*ib+1)] + w * aij);
-        }
-      }
-    }
-  }
-
-  return;
-}
-*/
-
-
-void assemble ( int node_num, int coef_diff, double lambda, double node_xy[], int nnodes, int element_num,
-  int element_node[], int quad_num, double wq[], double xq[], double yq[],
-  double element_area[], int ib, double time, double a[], double f[], int T[],int H[], int E[],
-  double N_old[])
-// ***************************
-{
-  double aij;
-  int basis;
-  double bi;
-  double bj;
-  double dbidx;
-  double dbidy;
-  double dbjdx;
-  double dbjdy;
-  int element;
-  int i;
-  int j;
-  int node;
-  int quad;
-  int test;
-  double w;
-  double x;
-  double y;
-
 //
 //  Initialize the arrays to zero.
 //
@@ -541,8 +415,8 @@ void assemble ( int node_num, int coef_diff, double lambda, double node_xy[], in
 
         qbf ( x, y, element, test, node_xy, element_node,
           element_num, nnodes, node_num, &bi, &dbidx, &dbidy );
-        
-        f[node] = f[node] + w * rhs ( x, y, T[node], H[node], E[node], N_old[node], lambda) * bi;
+
+        f[node] = f[node] + w * rhs ( x, y, time, u_old[node], T[node], H[node], K, lambda) * bi;
 //
 //  We are about to compute a contribution associated with the
 //  I-th test function and the J-th basis function, and add this
@@ -562,9 +436,9 @@ void assemble ( int node_num, int coef_diff, double lambda, double node_xy[], in
           qbf ( x, y, element, basis, node_xy, element_node,
             element_num, nnodes, node_num, &bj, &dbjdx, &dbjdy );
 
-          aij = dbidx * dbjdx + dbidy * dbjdy;
+          aij = DIFF*(dbidx * dbjdx + dbidy * dbjdy);
 
-          a[node-j+2*ib+j*(3*ib+1)] = coef_diff*(a[node-j+2*ib+j*(3*ib+1)] + w * aij);
+          a[node-j+2*ib+j*(3*ib+1)] = a[node-j+2*ib+j*(3*ib+1)] + w * aij;
         }
       }
     }
@@ -572,7 +446,6 @@ void assemble ( int node_num, int coef_diff, double lambda, double node_xy[], in
 
   return;
 }
-
 //****************************************************************************80
 
 int bandwidth ( int nnodes, int element_num, int element_node[], int node_num )
@@ -819,7 +692,7 @@ int dgb_fa ( int n, int ml, int mu, double a[], int pivot[] )
 //****************************************************************************80
 
 void dgb_print_some ( int m, int n, int ml, int mu, double a[], int ilo,
-  int jlo, int ihi, int jhi, string title )
+  int jlo, int ihi, int jhi, std::string title )
 
 //****************************************************************************80
 //
@@ -869,7 +742,7 @@ void dgb_print_some ( int m, int n, int ml, int mu, double a[], int ilo,
 //    Input, int ILO, JLO, IHI, JHI, designate the first row and
 //    column, and the last row and column to be printed.
 //
-//    Input, string TITLE, a title to print.
+//    Input, std::string TITLE, a title to print.
 {
 # define INCX 5
 
@@ -899,7 +772,7 @@ void dgb_print_some ( int m, int n, int ml, int mu, double a[], int ilo,
     std::cout << "  Col: ";
     for ( j = j2lo; j <= j2hi; j++ )
     {
-      std::cout << setw(7) << j << "       ";
+      std::cout << std::setw(7) << j << "       ";
     }
     std::cout << "\n";
     std::cout << "  Row\n";
@@ -918,7 +791,7 @@ void dgb_print_some ( int m, int n, int ml, int mu, double a[], int ilo,
 //
 //  Print out (up to) 5 entries in row I, that lie in the current strip.
 //
-      std::cout << setw(6) << i << "  ";
+      std::cout << std::setw(6) << i << "  ";
       for ( j = j2lo; j <= j2hi; j++ )
       {
         if ( ml < i-j || mu < j-i )
@@ -927,7 +800,7 @@ void dgb_print_some ( int m, int n, int ml, int mu, double a[], int ilo,
         }
         else
         {
-          std::cout << setw(10) << a[i-j+ml+mu+(j-1)*col] << "  ";
+          std::cout << std::setw(10) << a[i-j+ml+mu+(j-1)*col] << "  ";
         }
       }
       std::cout << "\n";
@@ -1106,19 +979,13 @@ double *dgb_sl ( int n, int ml, int mu, double a[], int pivot[],
       }
     }
   }
-  for(int i = 0; i<n ; i++){
-    if(x[i]<0){ //ANADIDO POR BLANCA
-      x[i] = 0;
-    }
-  }
-
 
   return x;
 }
 //****************************************************************************80*
 
 void element_write ( int nnodes, int element_num, int element_node[],
- string output_filename )
+ std::string output_filename )
 
 //****************************************************************************80*
 //
@@ -1147,13 +1014,13 @@ void element_write ( int nnodes, int element_num, int element_node[],
 //    Input, int ELEMENT_NODE[NNODES*ELEMENT_NUM]; ELEMENT_NODE(I,J) is the global
 //    index of local node I in element J.
 //
-//    Input, string OUTPUT_FILENAME, the name of the file
+//    Input, std::string OUTPUT_FILENAME, the name of the file
 //    in which the data should be stored.
 //
 {
   int element;
   int i;
-  ofstream output;
+  std::ofstream output;
 
   output.open ( output_filename.c_str ( ) );
 
@@ -1169,7 +1036,7 @@ void element_write ( int nnodes, int element_num, int element_node[],
   {
     for ( i = 0; i < nnodes; i++ )
     {
-      output << setw(8)  << element_node[i+element*nnodes] << "  ";
+      output << std::setw(8)  << element_node[i+element*nnodes] << "  ";
     }
     output << "\n";
   }
@@ -1179,193 +1046,14 @@ void element_write ( int nnodes, int element_num, int element_node[],
   return;
 }
 //****************************************************************************80*
-/*
-void errors ( int nx, int ny, double element_area[], int element_node[], double node_xy[],
-  double u[], int element_num, int nnodes, int node_num, double time,
-  double *el2, double *eh1 )
 
-//****************************************************************************80*
-//
-//  Purpose:
-//
-//    ERRORS calculates the error in the L2 and H1-seminorm.
-//
-//  Discussion:
-//
-//    This routine uses a 13 point quadrature rule in each element,
-//    in order to estimate the values of
-//
-//      EL2 = Sqrt ( Integral ( U(x,y) - Uh(x,y) )**2 dx dy )
-//
-//      EH1 = Sqrt ( Integral ( Ux(x,y) - Uhx(x,y) )**2 +
-//                            ( Uy(x,y) - Uhy(x,y) )**2 dx dy )
-//
-//    Here U is the exact solution, and Ux and Uy its spatial derivatives,
-//    as evaluated by a user-supplied routine.
-//
-//    Uh, Uhx and Uhy are the computed solution and its spatial derivatives,
-//    as specified by the computed finite element solution.
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license.
-//
-//  Modified:
-//
-//    16 April 2006
-//
-//  Author:
-//
-//    C++ version by John Burkardt
-//
-//  Parameters:
-//
-//    Input, double ELEMENT_AREA[ELEMENT_NUM], the area of each element.
-//
-//    Input, int ELEMENT_NODE[NNODES*ELEMENT_NUM]; ELEMENT_NODE(I,J) is the global
-//    index of local node I in element J.
-//
-//    Input, double NODE_XY[2*NODE_NUM], the X and Y coordinates of nodes.
-//
-//    Input, double U[NUNK], the coefficients of the solution.
-//
-//    Input, int ELEMENT_NUM, the number of elements.
-//
-//    Input, int NNODES, the number of nodes used to form one element.
-//
-//    Input, int NODE_NUM, the number of nodes.
-//
-//    Input, real ( kind = 8 ) TIME, the current time.
-//
-//    Output, double precision *EL2, the L2 error.
-//
-//    Output, double precision *EH1, the H1 seminorm error.
-//
-//  Local Parameters:
-//
-//    Local, double AR, the weight for a given quadrature point
-//    in a given element.
-//
-//    Local, double BI, DBIDX, DBIDY, a basis function and its first
-//    derivatives evaluated at a particular quadrature point.
-//
-//    Local, double EH1, the H1 seminorm error.
-//
-//    Local, double EL2, the L2 error.
-//
-//    Local, int NQE, the number of points in the quadrature rule.
-//    This is actually fixed at 13.
-//
-//    Local, double UEX, UEXX, UEXY, the exact solution and its first
-//    derivatives evaluated at a particular quadrature point.
-//
-//    Local, double UH, UHX, UHY, the computed solution and its first
-//    derivatives evaluated at a particular quadrature point.
-//
-//    Local, double WQE[NQE], stores the quadrature weights.
-//
-//    Local, double X, Y, the coordinates of a particular
-//    quadrature point.
-//
-//    Local, double XQE[NQE], YQE[NQE], stores the location
-//    of quadrature points in a given element.
-//
-{
-# define NQE 13
-
-  double ar;
-  double bi;
-  double dbidx;
-  double dbidy;
-  double dudx_exact[1];
-  double dudxh;
-  double dudy_exact[1];
-  double dudyh;
-  int element;
-  int i;
-  int in1;
-  int quad;
-  double u_exact[1];
-  double uh;
-  double wqe[NQE];
-  double x;
-  double xqe[NQE];
-  double xy[2];
-  double y;
-  double yqe[NQE];
-
-  *el2 = 0.0;
-  *eh1 = 0.0;
-//
-//  For each element, retrieve the nodes, area, quadrature weights,
-//  and quadrature points.
-//
-  for ( element = 0; element < element_num; element++ )
-  {
-    quad_e ( node_xy, element_node, element, element_num,
-      nnodes, node_num, NQE, wqe, xqe, yqe );
-//
-//  For each quadrature point, evaluate the computed solution and its X and
-//  Y derivatives.
-//
-    for ( quad = 0; quad < NQE; quad++ )
-    {
-      ar = element_area[element] * wqe[quad];
-      x = xqe[quad];
-      y = yqe[quad];
-
-      uh = 0.0;
-      dudxh = 0.0;
-      dudyh = 0.0;
-
-      for ( in1 = 0; in1 < nnodes; in1++ )
-      {
-        i = element_node[in1+element*nnodes];
-
-        qbf ( x, y, element, in1, node_xy,
-          element_node, element_num, nnodes, node_num, &bi, &dbidx, &dbidy );
-
-        uh    = uh    + bi    * u[i];
-        dudxh = dudxh + dbidx * u[i];
-        dudyh = dudyh + dbidy * u[i];
-      }
-//
-//  Evaluate the exact solution and its X and Y derivatives.
-//
-      xy[0] = x;
-      xy[1] = y;
-
-      initial_nutrients ( nx, ny, 1, xy, time, u_exact, dudx_exact, dudy_exact );
-//
-//  Add the weighted value at this quadrature point to the quadrature sum.
-//
-      *el2 = *el2 + ar *   pow ( ( uh    - u_exact[0]  ), 2 );
-
-      *eh1 = *eh1 + ar * ( pow ( ( dudxh - dudx_exact[0] ), 2 )
-                         + pow ( ( dudyh - dudy_exact[0] ), 2 ) );
-    }
-  }
-
-  *el2 = sqrt ( *el2 );
-  *eh1 = sqrt ( *eh1 );
-
-  std::cout << setw(14) << time
-       << setw(14) << *el2
-       << setw(14) << *eh1 << "\n";
-
-  return;
-# undef NQE
-}
-*/
-//****************************************************************************80
-
-void initial_nutrients ( int nx, int ny, int node_num, double node_xy[], double time, double u[])
+void initial_nutrients ( int node_num, double node_xy[], double time, double u[], int nx, int ny )
 
 //****************************************************************************80
 //
 //  Purpose:
 //
-//    initial_nutrients calculates the exact solution and its first derivatives.
+//    EXACT_U calculates the exact solution and its first derivatives.
 //
 //  Discussion:
 //
@@ -1414,51 +1102,31 @@ void initial_nutrients ( int nx, int ny, int node_num, double node_xy[], double 
 //    the X and Y derivatives of the exact solution.
 //
 {
-# define PI 3.141592653589793
-
-  double x;
-  double y;
-
-  int i;
-  int j;
   int node;
 
   node = 0;
-
-  for ( j = 1; j <= 2 * ny - 1; j++ )
+  for ( int j = 1; j <= 2 * ny - 1; j++ )
   {
-    for ( i = 1; i <= 2 * nx - 1; i++ )
+    for ( int i = 1; i <= 2 * nx - 1; i++ )
     {
-      if ( j == 1 || // arriba
-           j == 2 * ny - 1) //abajo
-           //i == 1 || 
-           //i == 2 * nx - 1 ) 
+      if ( j == 1 ||
+           j == 2 * ny - 1)
       {
-        u[node] = 30;
+        u[node] = 5;
       }
-      //if (i == 1 || // derecha
-       //   i == 2 * nx - 1 ){ // izquierda
-        //node_boundary[node] = 1;
-      //}
       else
       {
         u[node] = 0;
       }
-      x = node_xy[0+node*2];
-      y = node_xy[1+node*2];
       node = node + 1;
     }
   }
-
-
-  
-
   return;
-# undef PI
 }
+
 //****************************************************************************80
 
-void filename_inc ( string *filename )
+void filename_inc ( std::string *filename )
 
 //****************************************************************************80
 //
@@ -1475,7 +1143,7 @@ void filename_inc ( string *filename )
 //
 //    If the name is empty, then the routine stops.
 //
-//    If the name contains no digits, the empty string is returned.
+//    If the name contains no digits, the empty std::string is returned.
 //
 //  Example:
 //
@@ -1501,7 +1169,7 @@ void filename_inc ( string *filename )
 //
 //  Parameters:
 //
-//    Input/output, string *FILENAME, the filename to be incremented.
+//    Input/output, std::string *FILENAME, the filename to be incremented.
 //
 {
   char c;
@@ -1513,9 +1181,9 @@ void filename_inc ( string *filename )
 
   if ( lens <= 0 )
   {
-    cerr << "\n";
-    cerr << "FILENAME_INC - Fatal error!\n";
-    cerr << "  The input string is empty.\n";
+    std::cout << "\n";
+    std::cout << "FILENAME_INC - Fatal error!\n";
+    std::cout << "  The input std::string is empty.\n";
     exit ( 1 );
   }
 
@@ -1760,7 +1428,7 @@ int i4_min ( int i1, int i2 )
 }
 //****************************************************************************80
 
-void i4vec_print_some ( int n, int a[], int max_print, string title )
+void i4vec_print_some ( int n, int a[], int max_print, std::string title )
 
 //****************************************************************************80
 //
@@ -1799,7 +1467,7 @@ void i4vec_print_some ( int n, int a[], int max_print, string title )
 //
 //    Input, int MAX_PRINT, the maximum number of lines to print.
 //
-//    Input, string TITLE, an optional title.
+//    Input, std::string TITLE, an optional title.
 //
 {
   int i;
@@ -1825,32 +1493,32 @@ void i4vec_print_some ( int n, int a[], int max_print, string title )
   {
     for ( i = 0; i < n; i++ )
     {
-      std::cout << setw(6)  << i + 1 << "  "
-           << setw(10) << a[i] << "\n";
+      std::cout << std::setw(6)  << i + 1 << "  "
+           << std::setw(10) << a[i] << "\n";
     }
   }
   else if ( 3 <= max_print )
   {
     for ( i = 0; i < max_print-2; i++ )
     {
-      std::cout << setw(6)  << i + 1 << "  "
-           << setw(10) << a[i]  << "\n";
+      std::cout << std::setw(6)  << i + 1 << "  "
+           << std::setw(10) << a[i]  << "\n";
     }
     std::cout << "......  ..............\n";
     i = n - 1;
-    std::cout << setw(6)  << i + 1 << "  "
-         << setw(10) << a[i]  << "\n";
+    std::cout << std::setw(6)  << i + 1 << "  "
+         << std::setw(10) << a[i]  << "\n";
   }
   else
   {
     for ( i = 0; i < max_print-1; i++ )
     {
-      std::cout << setw(6)  << i + 1 << "  "
-           << setw(10) << a[i]  << "\n";
+      std::cout << std::setw(6)  << i + 1 << "  "
+           << std::setw(10) << a[i]  << "\n";
     }
     i = max_print - 1;
-    std::cout << setw(6)  << i + 1 << "  "
-         << setw(10) << a[i]  << "...more entries...\n";
+    std::cout << std::setw(6)  << i + 1 << "  "
+         << std::setw(10) << a[i]  << "...more entries...\n";
   }
 
   return;
@@ -1918,17 +1586,13 @@ int *node_boundary_set ( int nx, int ny, int node_num )
   {
     for ( i = 1; i <= 2 * nx - 1; i++ )
     {
-      if ( j == 1 || // arriba
-           j == 2 * ny - 1) //abajo
-           //i == 1 || 
-           //i == 2 * nx - 1 ) 
+      if ( j == 1 ||
+           j == 2 * ny - 1)
+           //i == 1 ||
+           //i == 2 * nx - 1 )
       {
         node_boundary[node] = 1;
       }
-      //if (i == 1 || // derecha
-       //   i == 2 * nx - 1 ){ // izquierda
-        //node_boundary[node] = 1;
-      //}
       else
       {
         node_boundary[node] = 0;
@@ -1941,7 +1605,7 @@ int *node_boundary_set ( int nx, int ny, int node_num )
 }
 //****************************************************************************80
 
-void nodes_plot ( string file_name, int node_num, double node_xy[],
+void nodes_plot ( std::string file_name, int node_num, double node_xy[],
   bool node_label )
 
 //****************************************************************************80
@@ -1964,7 +1628,7 @@ void nodes_plot ( string file_name, int node_num, double node_xy[],
 //
 //  Parameters:
 //
-//    Input, string FILE_NAME, the name of the file to create.
+//    Input, std::string FILE_NAME, the name of the file to create.
 //
 //    Input, int NODE_NUM, the number of nodes.
 //
@@ -1975,7 +1639,7 @@ void nodes_plot ( string file_name, int node_num, double node_xy[],
 {
   int circle_size;
   int delta;
-  ofstream file_unit;
+  std::ofstream file_unit;
   int node;
   double x_max;
   double x_min;
@@ -2241,7 +1905,7 @@ void nodes_plot ( string file_name, int node_num, double node_xy[],
 }
 //****************************************************************************80*
 
-void nodes_write ( int node_num, double node_xy[], string output_filename )
+void nodes_write ( int node_num, double node_xy[], std::string output_filename )
 
 //****************************************************************************80*
 //
@@ -2267,12 +1931,12 @@ void nodes_write ( int node_num, double node_xy[], string output_filename )
 //
 //    Input, double NODE_XY[2*NODE_NUM], the X and Y coordinates of nodes.
 //
-//    Input, string OUTPUT_FILENAME, the name of the file
+//    Input, std::string OUTPUT_FILENAME, the name of the file
 //    in which the data should be stored.
 //
 {
   int node;
-  ofstream output;
+  std::ofstream output;
   double x;
   double y;
 
@@ -2290,8 +1954,9 @@ void nodes_write ( int node_num, double node_xy[], string output_filename )
   {
     x = node_xy[0+node*2];
     y = node_xy[1+node*2];
-    output << setw(8)  << x << "  "
-           << setw(8)  << y << "\n";
+
+    output << std::setw(8)  << x << "  "
+           << std::setw(8)  << y << "\n";
   }
 
   output.close ( );
@@ -2874,7 +2539,7 @@ int r8_nint ( double x )
 }
 //****************************************************************************80
 
-void r8vec_print_some ( int n, double a[], int i_lo, int i_hi, string title )
+void r8vec_print_some ( int n, double a[], int i_lo, int i_hi, std::string title )
 
 //****************************************************************************80
 //
@@ -2907,7 +2572,7 @@ void r8vec_print_some ( int n, double a[], int i_lo, int i_hi, string title )
 //    Input, integer I_LO, I_HI, the first and last indices to print.
 //    The routine expects 1 <= I_LO <= I_HI <= N.
 //
-//    Input, string TITLE, an optional title.
+//    Input, std::string TITLE, an optional title.
 //
 {
   int i;
@@ -2921,15 +2586,15 @@ void r8vec_print_some ( int n, double a[], int i_lo, int i_hi, string title )
   std::cout << "\n";
   for ( i = i4_max ( 1, i_lo ); i <= i4_min ( n, i_hi ); i++ )
   {
-    std::cout << "  " << setw(8)  << i       << "  "
-         << "  " << setw(14) << a[i-1]  << "\n";
+    std::cout << "  " << std::setw(8)  << i       << "  "
+         << "  " << std::setw(14) << a[i-1]  << "\n";
   }
 
   return;
 }
 //****************************************************************************80
-/*
-double rhs ( double x, double y, double time )
+
+double rhs ( double x, double y, double time, double N_old, int T, int H, float K, float lambda )
 
 //****************************************************************************80
 //
@@ -2967,51 +2632,21 @@ double rhs ( double x, double y, double time )
 //    hand side of the differential equation at (X,Y).
 //
 {
-# define PI 3.141592653589793
-
-  double ut;
-  //double uxx;
-  //double uyy;
   double value;
 
-  ut =            - sin ( PI * x ) * sin ( PI * y ) * exp ( - time );
-  //uxx = - PI * PI * sin ( PI * x ) * sin ( PI * y ) * exp ( - time );
-  //uyy = - PI * PI * sin ( PI * x ) * sin ( PI * y ) * exp ( - time );
-
-  value = ut; //- uxx - uyy;
+  value = -lambda*K*T*N_old -K*H*N_old; //INTRODUCIR CEL CITOTOXICAS
 
   return value;
-# undef PI
-}
-*/
-
-double rhs (int x, int y, int T, int H, int E, int N, double L)
-{
-# define K 0.5
-# define K1 K*L
-
-  double ut;
-
-  double value;
-
-  ut = -K1*N*T -K*N*H -K*N*E;  //MODIFICAR Y VER COMO SALE EL TUMOR
-
-  value = ut;
-
-  return value;
-
-# undef K
-# undef K1
 }
 //****************************************************************************80
 
-int s_len_trim ( string s )
+int s_len_trim ( std::string s )
 
 //****************************************************************************80
 //
 //  Purpose:
 //
-//    S_LEN_TRIM returns the length of a string to the last nonblank.
+//    S_LEN_TRIM returns the length of a std::string to the last nonblank.
 //
 //  Licensing:
 //
@@ -3027,10 +2662,10 @@ int s_len_trim ( string s )
 //
 //  Parameters:
 //
-//    Input, string S, a string.
+//    Input, std::string S, a std::string.
 //
-//    Output, int S_LEN_TRIM, the length of the string to the last nonblank.
-//    If S_LEN_TRIM is 0, then the string is entirely blank.
+//    Output, int S_LEN_TRIM, the length of the std::string to the last nonblank.
+//    If S_LEN_TRIM is 0, then the std::string is entirely blank.
 //
 {
   int n;
@@ -3050,7 +2685,7 @@ int s_len_trim ( string s )
 }
 //****************************************************************************80*
 
-void solution_write ( int node_num, double u[], string u_file_name )
+void solution_write ( int node_num, double u[], std::string u_file_name )
 
 //****************************************************************************80*
 //
@@ -3076,12 +2711,12 @@ void solution_write ( int node_num, double u[], string u_file_name )
 //
 //    Input, double U[NODE_NUM], the coefficients of the solution.
 //
-//    Input, string U_FILE_NAME, the name of the file
+//    Input, std::string U_FILE_NAME, the name of the file
 //    in which the data should be stored.
 //
 {
   int node;
-  ofstream u_file;
+  std::ofstream u_file;
 
   u_file.open ( u_file_name.c_str ( ) );
 
@@ -3096,7 +2731,7 @@ void solution_write ( int node_num, double u[], string u_file_name )
 
   for ( node = 0; node < node_num; node++ )
   {
-    u_file << setw(14) << u[node] << "\n";
+    u_file << std::setw(14) << u[node] << "\n";
   }
 
   u_file.close ( );
@@ -3149,436 +2784,6 @@ void timestamp ( void )
 
   return;
 # undef TIME_SIZE
-}
-//****************************************************************************80
-
-void triangulation_order6_plot ( string file_name, int node_num, double node_xy[],
-  int tri_num, int triangle_node[], int node_show, int triangle_show )
-
-//****************************************************************************80
-//
-//  Purpose:
-//
-//    TRIANGULATION_ORDER6_PLOT plots a 6-node triangulation of a pointset.
-//
-//  Discussion:
-//
-//    The triangulation is most usually a Delaunay triangulation,
-//    but this is not necessary.
-//
-//    This routine has been specialized to deal correctly ONLY with
-//    a mesh of 6 node elements, with the property that starting
-//    from local node 1 and traversing the edges of the element will
-//    result in encountering local nodes 1, 4, 2, 5, 3, 6 in that order.
-//
-//  Licensing:
-//
-//    This code is distributed under the GNU LGPL license.
-//
-//  Modified:
-//
-//    27 September 2006
-//
-//  Author:
-//
-//    John Burkardt
-//
-//  Parameters:
-//
-//    Input, string FILE_NAME, the name of the file to create.
-//
-//    Input, int NODE_NUM, the number of nodes.
-//
-//    Input, double precision NODE_XY[2*NODE_NUM], the nodes.
-//
-//    Input, int TRI_NUM, the number of triangles.
-//
-//    Input, int TRIANGLE_NODE[6*TRI_NUM], lists, for each triangle,
-//    the indices of the points that form the vertices and midsides
-//    of the triangle.
-//
-//    Input, int NODE_SHOW:
-//    0, do not show nodes;
-//    1, show nodes;
-//    2, show nodes and label them.
-//
-//    Input, int TRIANGLE_SHOW:
-//    0, do not show triangles;
-//    1, show triangles;
-//    2, show triangles and label them.
-//
-{
-  double ave_x;
-  double ave_y;
-  int circle_size;
-  int delta;
-  ofstream file_unit;
-  int i;
-  int ip1;
-  int node;
-  int order[6] = { 0, 3, 1, 4, 2, 5 };
-  int triangle;
-  double x_max;
-  double x_min;
-  int x_ps;
-  int x_ps_max = 576;
-  int x_ps_max_clip = 594;
-  int x_ps_min = 36;
-  int x_ps_min_clip = 18;
-  double x_scale;
-  double y_max;
-  double y_min;
-  int y_ps;
-  int y_ps_max = 666;
-  int y_ps_max_clip = 684;
-  int y_ps_min = 126;
-  int y_ps_min_clip = 108;
-  double y_scale;
-//
-//  We need to do some figuring here, so that we can determine
-//  the range of the data, and hence the height and width
-//  of the piece of paper.
-//
-  x_max = -r8_huge ( );
-  for ( node = 0; node < node_num; node++ )
-  {
-     if ( x_max < node_xy[0+node*2] )
-     {
-       x_max = node_xy[0+node*2];
-     }
-  }
-  x_min = r8_huge ( );
-  for ( node = 0; node < node_num; node++ )
-  {
-     if ( node_xy[0+node*2] < x_min )
-     {
-       x_min = node_xy[0+node*2];
-     }
-  }
-  x_scale = x_max - x_min;
-
-  x_max = x_max + 0.05 * x_scale;
-  x_min = x_min - 0.05 * x_scale;
-  x_scale = x_max - x_min;
-
-  y_max = -r8_huge ( );
-  for ( node = 0; node < node_num; node++ )
-  {
-     if ( y_max < node_xy[1+node*2] )
-     {
-       y_max = node_xy[1+node*2];
-     }
-  }
-  y_min = r8_huge ( );
-  for ( node = 0; node < node_num; node++ )
-  {
-     if ( node_xy[1+node*2] < y_min )
-     {
-       y_min = node_xy[1+node*2];
-     }
-  }
-  y_scale = y_max - y_min;
-
-  y_max = y_max + 0.05 * y_scale;
-  y_min = y_min - 0.05 * y_scale;
-  y_scale = y_max - y_min;
-
-  if ( x_scale < y_scale )
-  {
-    delta = r8_nint ( ( double ) ( x_ps_max - x_ps_min )
-      * ( y_scale - x_scale ) / ( 2.0 * y_scale ) );
-
-    x_ps_max = x_ps_max - delta;
-    x_ps_min = x_ps_min + delta;
-
-    x_ps_max_clip = x_ps_max_clip - delta;
-    x_ps_min_clip = x_ps_min_clip + delta;
-
-    x_scale = y_scale;
-  }
-  else if ( y_scale < x_scale )
-  {
-    delta = r8_nint ( ( double ) ( y_ps_max - y_ps_min )
-      * ( x_scale - y_scale ) / ( 2.0 * x_scale ) );
-
-    y_ps_max = y_ps_max - delta;
-    y_ps_min = y_ps_min + delta;
-
-    y_ps_max_clip = y_ps_max_clip - delta;
-    y_ps_min_clip = y_ps_min_clip + delta;
-
-    y_scale = x_scale;
-  }
-
-  file_unit.open ( file_name.c_str ( ) );
-
-  if ( !file_unit )
-  {
-    std::cout << "\n";
-    std::cout << "TRIANGULATION_ORDER6_PLOT - Fatal error!\n";
-    std::cout << "  Could not open the output EPS file.\n";
-    exit ( 1 );
-  }
-
-  file_unit << "%!PS-Adobe-3.0 EPSF-3.0\n";
-  file_unit << "%%Creator: triangulation_order6_plot.cpp\n";
-  file_unit << "%%Title: " << file_name << "\n";
-  file_unit << "%%Pages: 1\n";
-  file_unit << "%%BoundingBox:  "
-    << x_ps_min << "  "
-    << y_ps_min << "  "
-    << x_ps_max << "  "
-    << y_ps_max << "\n";
-  file_unit << "%%Document-Fonts: Times-Roman\n";
-  file_unit << "%%LanguageLevel: 1\n";
-  file_unit << "%%EndComments\n";
-  file_unit << "%%BeginProlog\n";
-  file_unit << "/inch {72 mul} def\n";
-  file_unit << "%%EndProlog\n";
-  file_unit << "%%Page:      1     1\n";
-  file_unit << "save\n";
-  file_unit << "%\n";
-  file_unit << "% Set the RGB line color to very light gray.\n";
-  file_unit << "%\n";
-  file_unit << " 0.9000 0.9000 0.9000 setrgbcolor\n";
-  file_unit << "%\n";
-  file_unit << "% Draw a gray border around the page.\n";
-  file_unit << "%\n";
-  file_unit << "newpath\n";
-  file_unit << x_ps_min << "  "
-            << y_ps_min << "  moveto\n";
-  file_unit << x_ps_max << "  "
-            << y_ps_min << "  lineto\n";
-  file_unit << x_ps_max << "  "
-            << y_ps_max << "  lineto\n";
-  file_unit << x_ps_min << "  "
-            << y_ps_max << "  lineto\n";
-  file_unit << x_ps_min << "  "
-            << y_ps_min << "  lineto\n";
-  file_unit << "stroke\n";
-  file_unit << "%\n";
-  file_unit << "% Set RGB line color to black.\n";
-  file_unit << "%\n";
-  file_unit << " 0.0000 0.0000 0.0000 setrgbcolor\n";
-  file_unit << "%\n";
-  file_unit << "%  Set the font and its size:\n";
-  file_unit << "%\n";
-  file_unit << "/Times-Roman findfont\n";
-  file_unit << "0.50 inch scalefont\n";
-  file_unit << "setfont\n";
-  file_unit << "%\n";
-  file_unit << "%  Print a title:\n";
-  file_unit << "%\n";
-  file_unit << "%  210  702 moveto\n";
-  file_unit << "%(Pointset) show\n";
-  file_unit << "%\n";
-  file_unit << "% Define a clipping polygon\n";
-  file_unit << "%\n";
-  file_unit << "newpath\n";
-  file_unit << x_ps_min_clip << "  "
-            << y_ps_min_clip << "  moveto\n";
-  file_unit << x_ps_max_clip << "  "
-            << y_ps_min_clip << "  lineto\n";
-  file_unit << x_ps_max_clip << "  "
-            << y_ps_max_clip << "  lineto\n";
-  file_unit << x_ps_min_clip << "  "
-            << y_ps_max_clip << "  lineto\n";
-  file_unit << x_ps_min_clip << "  "
-            << y_ps_min_clip << "  lineto\n";
-  file_unit << "clip newpath\n";
-//
-//  Draw the nodes.
-//
-  if ( node_num <= 200 )
-  {
-    circle_size = 5;
-  }
-  else if ( node_num <= 500 )
-  {
-    circle_size = 4;
-  }
-  else if ( node_num <= 1000 )
-  {
-    circle_size = 3;
-  }
-  else if ( node_num <= 5000 )
-  {
-    circle_size = 2;
-  }
-  else
-  {
-    circle_size = 1;
-  }
-  if ( 1 <= node_show )
-  {
-    file_unit << "%\n";
-    file_unit << "%  Draw filled dots at each node:\n";
-    file_unit << "%\n";
-    file_unit << "%  Set the color to blue:\n";
-    file_unit << "%\n";
-    file_unit << "0.000  0.150  0.750  setrgbcolor\n";
-    file_unit << "%\n";
-
-    for ( node = 0; node < node_num; node++ )
-    {
-      x_ps = ( int ) (
-        ( ( x_max - node_xy[0+node*2]         ) * ( double ) ( x_ps_min )
-        + (       + node_xy[0+node*2] - x_min ) * ( double ) ( x_ps_max ) )
-        / ( x_max                     - x_min ) );
-
-      y_ps = ( int ) (
-        ( ( y_max - node_xy[1+node*2]         ) * ( double ) ( y_ps_min )
-        + (         node_xy[1+node*2] - y_min ) * ( double ) ( y_ps_max ) )
-        / ( y_max                     - y_min ) );
-
-      file_unit << "newpath  "
-        << x_ps << "  "
-        << y_ps << "  "
-        << circle_size << " 0 360 arc closepath fill\n";
-    }
-  }
-//
-//  Label the nodes.
-//
-  if ( 2 <= node_show )
-  {
-    file_unit << "%\n";
-    file_unit << "%  Label the nodes:\n";
-    file_unit << "%\n";
-    file_unit << "%  Set the color to darker blue:\n";
-    file_unit << "%\n";
-    file_unit << "0.000  0.250  0.850  setrgbcolor\n";
-    file_unit << "/Times-Roman findfont\n";
-    file_unit << "0.20 inch scalefont\n";
-    file_unit << "setfont\n";
-
-    file_unit << "%\n";
-
-    for ( node = 0; node < node_num; node++ )
-    {
-      x_ps = ( int ) (
-        ( ( x_max - node_xy[0+node*2]         ) * ( double ) ( x_ps_min )
-        + (       + node_xy[0+node*2] - x_min ) * ( double ) ( x_ps_max ) )
-        / ( x_max                     - x_min ) );
-
-      y_ps = ( int ) (
-        ( ( y_max - node_xy[1+node*2]         ) * ( double ) ( y_ps_min )
-        + (         node_xy[1+node*2] - y_min ) * ( double ) ( y_ps_max ) )
-        / ( y_max                     - y_min ) );
-
-      file_unit << "newpath  "
-        << x_ps     << "  "
-        << y_ps + 5 << "  moveto ("
-        << node     << ") show\n";
-    }
-  }
-//
-//  Draw the triangles.
-//
-  if ( 1 <= triangle_show )
-  {
-    file_unit << "%\n";
-    file_unit << "%  Set the RGB color to red.\n";
-    file_unit << "%\n";
-    file_unit << "0.900  0.200  0.100 setrgbcolor\n";
-    file_unit << "%\n";
-    file_unit << "%  Draw the triangles.\n";
-    file_unit << "%\n";
-
-    for ( triangle = 0; triangle < tri_num; triangle++ )
-    {
-      node = triangle_node[order[0]+triangle*6];
-
-      x_ps = ( int ) (
-        ( ( x_max - node_xy[0+node*2]         ) * ( double ) ( x_ps_min )
-        + (       + node_xy[0+node*2] - x_min ) * ( double ) ( x_ps_max ) )
-        / ( x_max                     - x_min ) );
-
-      y_ps = ( int ) (
-        ( ( y_max - node_xy[1+node*2]         ) * ( double ) ( y_ps_min )
-        + (         node_xy[1+node*2] - y_min ) * ( double ) ( y_ps_max ) )
-        / ( y_max                     - y_min ) );
-
-      file_unit << "newpath  " << x_ps << "  " << y_ps << "  moveto\n";
-
-      for ( i = 1; i <= 6; i++ )
-      {
-        ip1 = ( i % 6 );
-        node = triangle_node[order[ip1]+triangle*6];
-
-        x_ps = ( int ) (
-          ( ( x_max - node_xy[0+node*2]         ) * ( double ) ( x_ps_min )
-          + (       + node_xy[0+node*2] - x_min ) * ( double ) ( x_ps_max ) )
-          / ( x_max                     - x_min ) );
-
-        y_ps = ( int ) (
-          ( ( y_max - node_xy[1+node*2]         ) * ( double ) ( y_ps_min )
-          + (         node_xy[1+node*2] - y_min ) * ( double ) ( y_ps_max ) )
-          / ( y_max                     - y_min ) );
-
-        file_unit << x_ps << "  " << y_ps << "  lineto\n";
-      }
-      file_unit << "stroke\n";
-    }
-  }
-//
-//  Label the triangles.
-//
-  if ( 2 <= triangle_show )
-  {
-    file_unit << "%\n";
-    file_unit << "%  Label the triangles.\n";
-    file_unit << "%\n";
-    file_unit << "%  Set the RGB color to darker red.\n";
-    file_unit << "%\n";
-    file_unit << "0.950  0.250  0.150 setrgbcolor\n";
-    file_unit << "/Times-Roman findfont\n";
-    file_unit << "0.20 inch scalefont\n";
-    file_unit << "setfont\n";
-    file_unit << "%\n";
-
-    for ( triangle = 0; triangle < tri_num; triangle++ )
-    {
-      ave_x = 0.0;
-      ave_y = 0.0;
-
-      for ( i = 0; i < 6; i++ )
-      {
-        node = triangle_node[i+triangle*6];
-        ave_x = ave_x + node_xy[0+node*2];
-        ave_y = ave_y + node_xy[1+node*2];
-      }
-
-      ave_x = ave_x / 6.0;
-      ave_y = ave_y / 6.0;
-
-      x_ps = ( int ) (
-        ( ( x_max - ave_x         ) * ( double ) ( x_ps_min )
-        + (       + ave_x - x_min ) * ( double ) ( x_ps_max ) )
-        / ( x_max         - x_min ) );
-
-      y_ps = ( int ) (
-        ( ( y_max - ave_y         ) * ( double ) ( y_ps_min )
-        + (         ave_y - y_min ) * ( double ) ( y_ps_max ) )
-        / ( y_max         - y_min ) );
-
-      file_unit << setw(4) << x_ps << "  "
-                << setw(4) << y_ps << "  "
-                << "moveto (" << triangle << ") show\n";
-    }
-  }
-
-  file_unit << "%\n";
-  file_unit << "restore showpage\n";
-  file_unit << "%\n";
-  file_unit << "% End of page\n";
-  file_unit << "%\n";
-  file_unit << "%%Trailer\n";
-  file_unit << "%%EOF\n";
-
-  file_unit.close ( );
-
-  return;
 }
 //****************************************************************************80
 
