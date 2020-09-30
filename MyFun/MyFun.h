@@ -2,10 +2,13 @@
 #include <array>
 #include <fstream>
 #include <vector>
-# include <time.h>
+#include <time.h>
 #include "../constants.hpp"
 using namespace constants;
 
+void necrosis(double &M, int &T, int &D, double rnd_n);
+void division(double N[], int T[],  int D[], int H[], int node, double rnd_n);
+void migracion(double M[], int T[], int D[], int H[], int node, double rnd_n);
 void create_vec(int node_num, int mat[], int value);
 void save_mat(int node_num, int mat[], std::string filename);
 void grow(int node_num, double M[], double N[], int T[], int D[], int H[]);
