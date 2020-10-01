@@ -148,15 +148,16 @@ void migracion(double M[], int T[], int D[], int H[], int node, double rnd_n){
         }
     }
 };
-void division(double N[], int T[], int D[], int H[], int node, double rnd_n){
+int division(double N[], int T[], int D[], int H[], int node, double rnd_n){
     std::vector<int> neighbour_nodes, free_nodes;
     int neighbour_node, index;
     float P;
-    P = exp( 1 - pow(N[node]/T[node], 2)/ pow(ThDiv,2) );
+    P = 1 - exp( -pow(N[node]/T[node], 2)/ pow(ThDiv,2) );
+    //std::cout<<"P: "<<P<<" random: "<<rnd_n<<std::endl;
     if(P>rnd_n){
         neighbours(node, T, neighbour_nodes);
         free_neighbours(T, neighbour_nodes, free_nodes);
-
+        //std::cout<<" T antes: "<<T[node];
         if( free_nodes.empty() ){ //apilamiento
             T[node]++;
         }
@@ -172,6 +173,8 @@ void division(double N[], int T[], int D[], int H[], int node, double rnd_n){
             }
         }
     }
+    //std::cout<<" T despues: "<<T[node]<<" Vecino: "<<T[neighbour_node];
+    return neighbour_node;
 };
 void grow(int node_num, double M[], double N[], int T[], int D[], int H[]){  
     std::default_random_engine generator{static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
@@ -193,7 +196,9 @@ void grow(int node_num, double M[], double N[], int T[], int D[], int H[]){
                 migracion(M, T, D, H, node, rnd_n);
                 break;
             case 3:
-                division(N, T, D, H, node, rnd_n);
+                int nei;
+                nei = division(N, T, D, H, node, rnd_n);
+                //std::cout<<"T despues fun: "<<T[node]<<" Vecino despues fun: "<<T[nei]<<std::endl;
                 break;
             } 
         }

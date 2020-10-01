@@ -134,11 +134,11 @@ int main ( void )
   std::string node_txt_file_name = folder + "rectangle_nodes.txt";
   std::string time_file_name = folder + "rectangle_time.txt";
   std::string triangulation_txt_file_name = folder + "rectangle_elements.txt";
-  std::string N_nutrients_name = folder + "N-000.txt";
-  std::string M_nutrients_name = folder + "M-000.txt";
-  std::string T_filename = folder + "T-000.txt";
-  std::string D_name = folder + "D-000.txt";
-  std::string H_name = folder + "H-000.txt";
+  std::string N_nutrients_name = folder + "N-00.txt";
+  std::string M_nutrients_name = folder + "M-00.txt";
+  std::string T_filename = folder + "T-00.txt";
+  std::string D_name = folder + "D-00.txt";
+  std::string H_name = folder + "H-00.txt";
   double time_final;
   double time_init;
   int time_step;
@@ -201,7 +201,7 @@ int main ( void )
 //  Set time stepping quantities.
   time_init = 0.0;
   time_final = 0.5;
-  time_step_num = 10;
+  time_step_num = 40;
   time_step_size = ( time_final - time_init ) / ( double ) ( time_step_num );
 
 //  Allocate space.
@@ -246,13 +246,12 @@ int main ( void )
   time_unit << "  " << std::setw(14) << time_ << "\n";
 
 
-
 //creamos T H y E
     create_vec(NODE_NUM, T, 0);
     create_vec(NODE_NUM, H, 1);
 
-    T[43] = 1;
-    H[43] = 0;
+    T[int((2*NX -1)*(2*NY - 1)/2)] = 1;
+    H[int((2*NX -1)*(2*NY - 1)/2)] = 0;
 
 //  Time looping.
   solution_write ( NODE_NUM, N, N_nutrients_name );
@@ -278,10 +277,10 @@ int main ( void )
 //  finite element equations.
     assemble ( NODE_NUM, node_xy, NNODES,
       ELEMENT_NUM, element_node, QUAD_NUM,
-      wq, xq, yq, element_area, ib, time_, a_N, f_N, N_old, T, H, K, L_N, DIFF );
+      wq, xq, yq, element_area, ib, time_, a_N, f_N, N_old, T, H, K, L_N, DIFFUSION );
     assemble ( NODE_NUM, node_xy, NNODES,
       ELEMENT_NUM, element_node, QUAD_NUM,
-      wq, xq, yq, element_area, ib, time_, a_M, f_M, M_old, T, H, K, L_M, DIFF );
+      wq, xq, yq, element_area, ib, time_, a_M, f_M, M_old, T, H, K, L_M, DIFFUSION );
 
     if ( false )
     {
