@@ -14,90 +14,52 @@ void save_mat(int node_num, int mat[], std::string filename){
     }
     File.close();
 }
-void free_neighbours(int T[], std::vector<int> &neighbour_nodes, std::vector<int> &free_nodes){
-    int node;
-    for(int neighbour = 0; neighbour<neighbour_nodes.size(); neighbour++){
-        node = neighbour_nodes[neighbour];
-        if (T[node] == 0){
-            free_nodes.push_back(node);
-        }
-    };
-};
-void neighbours(int node, int T[], std::vector<int> &neighbour_nodes){ // MEJORA: crear una funcion que te devuelva los nodos de al rededor
-    int X = 2*NX-1;
-    int Y = 2*NY-1;
-    //nodos internos
-    if( (node%X != 0) && (node%X != (X-1)) && (node > (X-1)) && (node < (X * (Y-1))) )
+void create_vec(int node_num, int mat[], int value){
+    for (int i = 0; i<node_num; i++) 
     {
-        //std::cout<<"INTERNOS";
-        neighbour_nodes.push_back(node-1);
-        neighbour_nodes.push_back(node+1);
-        neighbour_nodes.push_back(node-X);
-        neighbour_nodes.push_back(node+X);
+        mat[i] = value;
     }
+}
 
-    // nodos externos (sin vertices)
-    else if ( (node > (X * (Y-1))) && (node < (X*Y-1)) )  //arriba
+void grow(int node_num, double M[], double N[], int T[], int D[], int H[]){  
+    std::default_random_engine generator{static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
+    std::uniform_int_distribution<int> dice_distribution(1,3);
+    int dice;
+    for(int node = 0; node < node_num; node++)
     {
-        //std::cout<<"EXTERNOS";
-        neighbour_nodes.push_back(node-1);
-        neighbour_nodes.push_back(node+1);
-        neighbour_nodes.push_back(node-X);
-    }
-
-    else if ( (node%X == 0) && (node != (X * (Y-1))) && node != 0) // izqda
-    { 
-        //std::cout<<"IZQDA";
-        neighbour_nodes.push_back(node+1);
-        neighbour_nodes.push_back(node-X);
-        neighbour_nodes.push_back(node+X);
-    }
-
-    else if ( (node%X == X-1) && (node != (X*Y-1)) && (node != (X-1))) //dcha
-    { 
-        //std::cout<<"DCHA";
-        neighbour_nodes.push_back(node-1);
-        neighbour_nodes.push_back(node-X);
-        neighbour_nodes.push_back(node+X);
-    }
-    else if ( (node < (X-1)) && (node != 0) ){ //abajo
-        //std::cout<<"ABAJO";
-        neighbour_nodes.push_back(node-1);
-        neighbour_nodes.push_back(node+1);
-        neighbour_nodes.push_back(node+X);
-    }
-
-    else{  
-        //std::cout<<"ESQUINAS";
-        if( node == (X*Y - 1) ) // (X,Y)
-        {
-            neighbour_nodes.push_back(node-1);
-            neighbour_nodes.push_back(node-X);
+        changeNegativeValue(N[node]);
+        changeNegativeValue(M[node]);
+        if(T[node] >= 1){
+            dice = dice_distribution(generator);
+            switch (dice)
+            {
+            case 1:
+                necrosis(M[node], T[node], D[node]);
+                break;
+            case 2: 
+                migracion(M, T, D, H, node);
+                break;
+            case 3:
+                division(N, T, D, H, node);
+                break;
+            } 
         }
+    }    
+}
 
-        else if(node == 0) // (1,1)
-        { 
-            neighbour_nodes.push_back(node+1);
-            neighbour_nodes.push_back(node+X);
-        }
-
-        else if( node == (X-1) ) // (X,1)
-        {
-            neighbour_nodes.push_back(node-1);
-            neighbour_nodes.push_back(node+X);
-        }
-
-        else // (1,Y)
-        {
-            neighbour_nodes.push_back(node+1);
-            neighbour_nodes.push_back(node-X);
-        }
+void changeNegativeValue(double &value){
+    if(value<0){
+        value = 0;
     }
     return;
-};
-void necrosis(double &M, int &T, int &D, double rnd_n){
-    float P = exp(- pow((M/T),2)/pow(ThNec,2));
-    if( (P>rnd_n) && (D == 0) ){ // hay cel tumoral + no hay cel necrosada
+}
+
+void necrosis(double &M, int &T, int &D){
+    std::default_random_engine generator{static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
+    std::normal_distribution<double> distribution(0,NEC);
+    double rnd_n = distribution(generator), P;
+    P = exp(- pow(M,2)/pow(T*NEC,2));
+    if( (P>abs(rnd_n)) && (D == 0) ){ 
         T = T - 1;
         if(T == 0){
             D = 1;
@@ -105,13 +67,18 @@ void necrosis(double &M, int &T, int &D, double rnd_n){
     }
     return;
 }
-void migracion(double M[], int T[], int D[], int H[], int node, double rnd_n){
+void migracion(double M[], int T[], int D[], int H[], int node){
+    std::default_random_engine generator{static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
+    std::normal_distribution<double> distribution(0,MIG);
+    
     std::vector<int> neighbour_nodes, free_nodes;
     int neighbour_node, index;
-    float P = 1 - exp( - pow((sqrt(T[node]) * M[node]),2) / pow(ThMig,2));
+    double rnd_n = distribution(generator), P;
+    //P = 1 - exp( - pow((sqrt(T[node]) * M[node]),2) / pow(MIG,2));
+    P = 0;
     neighbours(node, T, neighbour_nodes);
     free_neighbours(T, neighbour_nodes, free_nodes);
-    if(P>rnd_n){
+    if(P>abs(rnd_n)){
         if( !free_nodes.empty() ){ // room, pick random
             index = rand() % free_nodes.size();
             neighbour_node = free_nodes[index];
@@ -148,16 +115,16 @@ void migracion(double M[], int T[], int D[], int H[], int node, double rnd_n){
         }
     }
 };
-int division(double N[], int T[], int D[], int H[], int node, double rnd_n){
+void division(double N[], int T[], int D[], int H[], int node){
+    std::default_random_engine generator{static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
+    std::normal_distribution<double> distribution(0,DIV);
     std::vector<int> neighbour_nodes, free_nodes;
     int neighbour_node, index;
-    float P;
-    P = 1 - exp( -pow(N[node]/T[node], 2)/ pow(ThDiv,2) );
-    //std::cout<<"P: "<<P<<" random: "<<rnd_n<<std::endl;
-    if(P>rnd_n){
+    double rnd_n = distribution(generator), P;
+    P = 1 - exp( - pow(N[node], 2)/ pow(T[node]*DIV,2) );
+    if(P>abs(rnd_n)){
         neighbours(node, T, neighbour_nodes);
         free_neighbours(T, neighbour_nodes, free_nodes);
-        //std::cout<<" T antes: "<<T[node];
         if( free_nodes.empty() ){ //apilamiento
             T[node]++;
         }
@@ -173,44 +140,83 @@ int division(double N[], int T[], int D[], int H[], int node, double rnd_n){
             }
         }
     }
-    //std::cout<<" T despues: "<<T[node]<<" Vecino: "<<T[neighbour_node];
-    return neighbour_node;
+    return;
 };
-void grow(int node_num, double M[], double N[], int T[], int D[], int H[]){  
-    std::default_random_engine generator{static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
-    std::normal_distribution<double> distribution(0.1,0.3); //DUDA: que valores meto aqui??
-    std::uniform_int_distribution<int> dice_distribution(1,3);
-    double rnd_n;
-    int dice;
-    for(int node = 0; node < node_num; node++)
+void free_neighbours(int T[], std::vector<int> &neighbour_nodes, std::vector<int> &free_nodes){
+    int node;
+    for(int neighbour = 0; neighbour<neighbour_nodes.size(); neighbour++){
+        node = neighbour_nodes[neighbour];
+        if (T[node] == 0){
+            free_nodes.push_back(node);
+        }
+    };
+};
+void neighbours(int node, int T[], std::vector<int> &neighbour_nodes){ // MEJORA: crear una funcion que te devuelva los nodos de al rededor
+    int X = 2*NX-1;
+    int Y = 2*NY-1;
+    // nodos internos
+    if( (node%X != 0) && (node%X != (X-1)) && (node > (X-1)) && (node < (X * (Y-1))) )
     {
-        if(T[node] >= 1){
-            rnd_n = distribution(generator);
-            dice = dice_distribution(generator);
-            switch (dice)
-            {
-            case 1:
-                necrosis(M[node], T[node], D[node], rnd_n);
-                break;
-            case 2: 
-                migracion(M, T, D, H, node, rnd_n);
-                break;
-            case 3:
-                int nei;
-                nei = division(N, T, D, H, node, rnd_n);
-                //std::cout<<"T despues fun: "<<T[node]<<" Vecino despues fun: "<<T[nei]<<std::endl;
-                break;
-            } 
+        neighbour_nodes.push_back(node-1);
+        neighbour_nodes.push_back(node+1);
+        neighbour_nodes.push_back(node-X);
+        neighbour_nodes.push_back(node+X);
+    }
+
+    // nodos externos (sin vertices)
+    else if ( (node > (X * (Y-1))) && (node < (X*Y-1)) )  //arriba
+    {
+        neighbour_nodes.push_back(node-1);
+        neighbour_nodes.push_back(node+1);
+        neighbour_nodes.push_back(node-X);
+    }
+
+    else if ( (node%X == 0) && (node != (X * (Y-1))) && node != 0) // izqda
+    { 
+        neighbour_nodes.push_back(node+1);
+        neighbour_nodes.push_back(node-X);
+        neighbour_nodes.push_back(node+X);
+    }
+
+    else if ( (node%X == X-1) && (node != (X*Y-1)) && (node != (X-1))) //dcha
+    { 
+        neighbour_nodes.push_back(node-1);
+        neighbour_nodes.push_back(node-X);
+        neighbour_nodes.push_back(node+X);
+    }
+    else if ( (node < (X-1)) && (node != 0) ){ //abajo
+        neighbour_nodes.push_back(node-1);
+        neighbour_nodes.push_back(node+1);
+        neighbour_nodes.push_back(node+X);
+    }
+
+    else{  //esquinas
+        if( node == (X*Y - 1) ) // (X,Y)
+        {
+            neighbour_nodes.push_back(node-1);
+            neighbour_nodes.push_back(node-X);
         }
 
-    }    
-}
-void create_vec(int node_num, int mat[], int value){
-    for (int i = 0; i<node_num; i++) 
-    {
-        mat[i] = value;
+        else if(node == 0) // (1,1)
+        { 
+            neighbour_nodes.push_back(node+1);
+            neighbour_nodes.push_back(node+X);
+        }
+
+        else if( node == (X-1) ) // (X,1)
+        {
+            neighbour_nodes.push_back(node-1);
+            neighbour_nodes.push_back(node+X);
+        }
+
+        else // (1,Y)
+        {
+            neighbour_nodes.push_back(node+1);
+            neighbour_nodes.push_back(node-X);
+        }
     }
-}
+    return;
+};
 
 /*************************************
 Pixel::Pixel(){cel_type = 'O'; M = 0; N = 0;};

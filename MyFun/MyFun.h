@@ -6,15 +6,15 @@
 #include "../constants.hpp"
 using namespace constants;
 
-void necrosis(double &M, int &T, int &D, double rnd_n);
-void division(double N[], int T[],  int D[], int H[], int node, double rnd_n);
-void migracion(double M[], int T[], int D[], int H[], int node, double rnd_n);
+void necrosis(double &M, int &T, int &D);
+void division(double N[], int T[],  int D[], int H[], int node);
+void migracion(double M[], int T[], int D[], int H[], int node);
 void create_vec(int node_num, int mat[], int value);
 void save_mat(int node_num, int mat[], std::string filename);
 void grow(int node_num, double M[], double N[], int T[], int D[], int H[]);
 void neighbours(int node, int T[], std::vector<int> &neighbour_nodes);
 void free_neighbours(int T[], std::vector<int> &neighbour_nodes, std::vector<int> &free_nodes );
-
+void changeNegativeValue(double &value);
 
 
 /*

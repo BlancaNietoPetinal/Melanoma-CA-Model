@@ -1,4 +1,6 @@
 #include <string>
+#include "../constants.hpp"
+using namespace constants;
 
 void adjust_backward_euler ( int node_num, double node_xy[], int nnodes,
   int element_num, int element_node[], int quad_num, double wq[],
@@ -12,7 +14,7 @@ void assemble ( int node_num, double node_xy[], int nnodes,
   int element_num, int element_node[], int quad_num,
   double wq[], double xq[], double yq[], double element_area[],
   int ib, double time, double a[], double f[], double u_old[],
-  int T[], int H[], float K, float lambda, double DIFF );
+  int T[], int H[], float lambda, double ALPHA );
 int bandwidth ( int nnodes, int element_num, int element_node[],
   int node_num );
 int dgb_fa ( int n, int ml, int mu, double a[], int pivot[] );
@@ -22,7 +24,7 @@ double *dgb_sl ( int n, int ml, int mu, double a[], int pivot[],
   double b[], int job );
 void element_write ( int nnodes, int element_num, int element_node[],
   std::string triangulation_txt_file_name );
-void initial_nutrients ( int node_num, double node_xy[], double time,
+void initial_nutrients ( int node_num, double node_xy[],
  double u_exact[], int nx, int ny);
 void filename_inc ( std::string *file_name );
 void grid_t6 ( int nx, int ny, int nnodes, int element_num, int element_node[] );
@@ -48,7 +50,7 @@ double r8_min ( double x, double y );
 int r8_nint ( double x );
 void r8vec_print_some ( int n, double a[], int i_lo, int i_hi, std::string title );
 double rhs ( double x, double y, double time, double N_old, 
-int T, int H, float K, float lambda );
+int T, int H, float lambda, double ALPHA );
 int s_len_trim ( std::string s );
 void solution_write ( int node_num, double u[], std::string u_file_name ) ;
 void timestamp ( );

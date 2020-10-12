@@ -30,11 +30,12 @@ int main() {
     T[45] = 1; // iniciar con una celula tumoral
     H[45] = 0; // iniciar con una celula tumoral
     srand(time(0));
-    for(int i = 0; i<=50; i++){
+    for(int i = 0; i<=30; i++){
         //std::cout<<"Iteracion numero "<<i<<std::endl;
-        evolve(NODE_NUM, M, N, T, D, H);
+        grow(NODE_NUM, M, N, T, D, H);
+
         if(i%10==0){
-            save_mat(NODE_NUM, T, "Tests/evolve_resultados/Tumor-"+std::to_string(i)+".txt");
+            save_mat(NODE_NUM, T, "Tests/evolve_resultados/T-"+std::to_string(i)+".txt");
             //save_mat(NODE_NUM, H, "Tests/evolve_results/Health-"+std::to_string(i)+".txt");
             //save_mat(NODE_NUM, D, "Tests/evolve_resultados/Dead-"+std::to_string(i)+".txt");
         }

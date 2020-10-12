@@ -6,10 +6,16 @@
             "command": "C:\\MinGW\\mingw32\\bin\\g++.exe",
             "args": [
                 "-g",
+                //"Tests/neighbours.cpp",
+                //"Tests/evolve_test.cpp",
+                //"Tests/fem_test.cpp",
+                //"DELETE.cpp",
                 "MyFun/MyFun.cpp",
                 "Program.cpp",
                 "FEM/fem2D.cpp",
                 //"FEM/femMain.cpp",
+                //"Sucio/sucio.cpp",
+                
                 //"${file}",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
@@ -17,6 +23,7 @@
             "options": {
                 "cwd": "${workspaceFolder}"
             },
+            
             "problemMatcher": [
                 "$gcc"
             ],

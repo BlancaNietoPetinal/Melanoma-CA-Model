@@ -193,7 +193,7 @@ void adjust_boundary ( int node_num, double node_xy[], int node_boundary[],
 //
   u_exact = new double[node_num];
 
-  initial_nutrients ( node_num, node_xy, time, u_exact, nx, ny);
+  initial_nutrients ( node_num, node_xy, u_exact, nx, ny);
 
   for ( node = 0; node < node_num; node++ )
   {
@@ -299,7 +299,7 @@ void area_set ( int node_num, double node_xy[], int nnodes,
 void assemble ( int node_num, double node_xy[], int nnodes, int element_num,
   int element_node[], int quad_num, double wq[], double xq[], double yq[],
   double element_area[], int ib, double time, double a[], double f[],
-  double u_old[], int T[], int H[], float K, float lambda, double DIFF )
+  double u_old[], int T[], int H[], float lambda, double ALPHA  )
 
 //****************************************************************************80*
 //
@@ -416,8 +416,8 @@ void assemble ( int node_num, double node_xy[], int nnodes, int element_num,
         qbf ( x, y, element, test, node_xy, element_node,
           element_num, nnodes, node_num, &bi, &dbidx, &dbidy );
 
-        f[node] = f[node] + w * rhs ( x, y, time, u_old[node], T[node], H[node], K, lambda) * bi;
-//
+        f[node] = f[node] + w * rhs ( x, y, time, u_old[node], T[node], H[node], lambda, ALPHA) * bi;
+        
 //  We are about to compute a contribution associated with the
 //  I-th test function and the J-th basis function, and add this
 //  to the entry A(I,J).
@@ -436,7 +436,7 @@ void assemble ( int node_num, double node_xy[], int nnodes, int element_num,
           qbf ( x, y, element, basis, node_xy, element_node,
             element_num, nnodes, node_num, &bj, &dbjdx, &dbjdy );
 
-          aij = DIFF*(dbidx * dbjdx + dbidy * dbjdy);
+          aij = COEF_DIFF*(dbidx * dbjdx + dbidy * dbjdy);
 
           a[node-j+2*ib+j*(3*ib+1)] = a[node-j+2*ib+j*(3*ib+1)] + w * aij;
         }
@@ -447,6 +447,8 @@ void assemble ( int node_num, double node_xy[], int nnodes, int element_num,
   return;
 }
 //****************************************************************************80
+
+
 
 int bandwidth ( int nnodes, int element_num, int element_node[], int node_num )
 
@@ -507,7 +509,6 @@ int bandwidth ( int nnodes, int element_num, int element_node[], int node_num )
   return nhba;
 }
 //****************************************************************************80
-
 int dgb_fa ( int n, int ml, int mu, double a[], int pivot[] )
 
 //****************************************************************************80
@@ -1047,13 +1048,13 @@ void element_write ( int nnodes, int element_num, int element_node[],
 }
 //****************************************************************************80*
 
-void initial_nutrients ( int node_num, double node_xy[], double time, double u[], int nx, int ny )
+void initial_nutrients ( int node_num, double node_xy[], double u[], int nx, int ny )
 
 //****************************************************************************80
 //
 //  Purpose:
 //
-//    EXACT_U calculates the exact solution and its first derivatives.
+//    initial_nutrients creates the initial nutrient matrix.
 //
 //  Discussion:
 //
@@ -1112,7 +1113,7 @@ void initial_nutrients ( int node_num, double node_xy[], double time, double u[]
       if ( j == 1 ||
            j == 2 * ny - 1)
       {
-        u[node] = 5;
+        u[node] = STARTING_NUTRIENTS;
       }
       else
       {
@@ -2594,7 +2595,8 @@ void r8vec_print_some ( int n, double a[], int i_lo, int i_hi, std::string title
 }
 //****************************************************************************80
 
-double rhs ( double x, double y, double time, double N_old, int T, int H, float K, float lambda )
+double rhs ( double x, double y, double time, double N_old, int T, int H,
+ float lambda, double ALPHA )
 
 //****************************************************************************80
 //
@@ -2633,9 +2635,8 @@ double rhs ( double x, double y, double time, double N_old, int T, int H, float 
 //
 {
   double value;
-
-  value = -lambda*K*T*N_old -K*H*N_old; //INTRODUCIR CEL CITOTOXICAS
-
+  value = -lambda*pow(ALPHA,2)*T*N_old -pow(ALPHA,2)*H*N_old; //INTRODUCIR CEL CITOTOXICAS
+  //value = -pow(ALPHA,2)*N_old*(lambda*T +H); 
   return value;
 }
 //****************************************************************************80

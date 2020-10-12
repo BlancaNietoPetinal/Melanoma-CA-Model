@@ -1,4 +1,5 @@
 # include <cstdlib>
+# include <stdlib.h> //for malloc
 # include <iostream>
 # include <iomanip>
 # include <fstream>
@@ -110,35 +111,29 @@ int main ( void )
 //    coordinates of the quadrature points in each element.
 //
 {
-  double *a_N;
-  double *a_M;
+
   double eh1;
   double el2;
   double element_area[ELEMENT_NUM];
   int element_node[NNODES*ELEMENT_NUM];
-  double *f_N;
-  double *f_M;
   int ib;
   int ierr_N;
   int ierr_M;
   int job;
   int node;
-  int *node_boundary;
   bool node_label;
   int node_show;
   double node_xy[2*NODE_NUM];
-  int *pivot_N;
-  int *pivot_M;
-  double time_;
+  double time;
   std::string folder = "Resultados/";
   std::string node_txt_file_name = folder + "rectangle_nodes.txt";
   std::string time_file_name = folder + "rectangle_time.txt";
   std::string triangulation_txt_file_name = folder + "rectangle_elements.txt";
-  std::string N_nutrients_name = folder + "N-00.txt";
-  std::string M_nutrients_name = folder + "M-00.txt";
-  std::string T_filename = folder + "T-00.txt";
-  std::string D_name = folder + "D-00.txt";
-  std::string H_name = folder + "H-00.txt";
+  std::string N_nutrients_name = folder + "N/000.txt";
+  std::string M_nutrients_name = folder + "M/000.txt";
+  std::string T_filename = folder + "T/000.txt";
+  std::string D_name = folder + "D/000.txt";
+  std::string H_name = folder + "H/000.txt";
   double time_final;
   double time_init;
   int time_step;
@@ -146,6 +141,12 @@ int main ( void )
   double time_step_size;
   std::ofstream time_unit;
   int triangle_show;
+  /*double *a_N;
+  double *a_M;
+  int *pivot_N;
+  int *pivot_M;
+  double *f_N;
+  double *f_M;
   double *N;
   double *M;
   double *N_exact;
@@ -155,6 +156,9 @@ int main ( void )
   int *T;
   int *H;
   int *D;
+  int *node_boundary;
+  */
+  int *node_boundary=(int *) malloc(sizeof(int)*NODE_NUM);
   double wq[QUAD_NUM];
   double xl = 0.0;
   double xq[QUAD_NUM*ELEMENT_NUM];
@@ -201,11 +205,26 @@ int main ( void )
 //  Set time stepping quantities.
   time_init = 0.0;
   time_final = 0.5;
-  time_step_num = 40;
+  time_step_num = ITERATIONS;
   time_step_size = ( time_final - time_init ) / ( double ) ( time_step_num );
-
 //  Allocate space.
-  a_N = new double[(3*ib+1)*NODE_NUM];
+  double *a_N = (double *) malloc(sizeof(double)*(3*ib+1)*NODE_NUM);
+  double *a_M=(double *) malloc(sizeof(double)*(3*ib+1)*NODE_NUM);
+  double *f_N=(double *) malloc(sizeof(double)*NODE_NUM);
+  double *f_M=(double *) malloc(sizeof(double)*NODE_NUM);
+  int *pivot_N=(int *) malloc(sizeof(int)*NODE_NUM);
+  int *pivot_M=(int *) malloc(sizeof(int)*NODE_NUM);
+  double *N=(double *) malloc(sizeof(double)*NODE_NUM);
+  double *N_exact=(double *) malloc(sizeof(double)*NODE_NUM);
+  double *N_old=(double *) malloc(sizeof(double)*NODE_NUM);
+  double *M_exact=(double *) malloc(sizeof(double)*NODE_NUM);
+  double *M_old=(double *) malloc(sizeof(double)*NODE_NUM);
+  double *M=(double *) malloc(sizeof(double)*NODE_NUM);
+  int *T=(int *) malloc(sizeof(int)*NODE_NUM);
+  int *D=(int *) malloc(sizeof(int)*NODE_NUM);
+  int *H=(int *) malloc(sizeof(int)*NODE_NUM);
+  
+  /*a_N = new double[(3*ib+1)*NODE_NUM];
   a_M = new double[(3*ib+1)*NODE_NUM];
   f_N = new double[NODE_NUM];
   f_M = new double[NODE_NUM];
@@ -220,11 +239,13 @@ int main ( void )
   T = new int[NODE_NUM];
   H = new int[NODE_NUM];
   D = new int[NODE_NUM];
+*/
+  
 
 //  Set the value of U at the initial time.
-  time_ = time_init;
-  initial_nutrients ( NODE_NUM, node_xy, time_, N_exact, NX, NY);
-  initial_nutrients ( NODE_NUM, node_xy, time_, M_exact, NX, NY);
+  time = time_init;
+  initial_nutrients ( NODE_NUM, node_xy, N_exact, NX, NY);
+  initial_nutrients ( NODE_NUM, node_xy, M_exact, NX, NY);
 
   for ( node = 0; node < NODE_NUM; node++ )
   {
@@ -243,7 +264,7 @@ int main ( void )
     exit ( 1 );
   }
 
-  time_unit << "  " << std::setw(14) << time_ << "\n";
+  time_unit << "  " << std::setw(14) << time << "\n";
 
 
 //creamos T H y E
@@ -269,7 +290,7 @@ int main ( void )
     delete [] N;
     delete [] M;
 
-    time_ = ( ( double ) ( time_step_num - time_step ) * time_init
+    time = ( ( double ) ( time_step_num - time_step ) * time_init
            + ( double ) (                 time_step ) * time_final )
            / ( double ) ( time_step_num             );
 
@@ -277,11 +298,10 @@ int main ( void )
 //  finite element equations.
     assemble ( NODE_NUM, node_xy, NNODES,
       ELEMENT_NUM, element_node, QUAD_NUM,
-      wq, xq, yq, element_area, ib, time_, a_N, f_N, N_old, T, H, K, L_N, DIFFUSION );
+      wq, xq, yq, element_area, ib, time, a_N, f_N, N_old, T, H, L_N, ALPHA );
     assemble ( NODE_NUM, node_xy, NNODES,
       ELEMENT_NUM, element_node, QUAD_NUM,
-      wq, xq, yq, element_area, ib, time_, a_M, f_M, M_old, T, H, K, L_M, DIFFUSION );
-
+      wq, xq, yq, element_area, ib, time, a_M, f_M, M_old, T, H, L_M, ALPHA );
     if ( false )
     {
       dgb_print_some ( NODE_NUM, NODE_NUM, ib, ib, a_N, 10, 1, 12, 25,
@@ -294,10 +314,10 @@ int main ( void )
 //  Modify the coefficient matrix and right hand side to account for the dU/dt
 //  term, which we are treating using the backward Euler formula.
     adjust_backward_euler ( NODE_NUM, node_xy, NNODES, ELEMENT_NUM,
-      element_node, QUAD_NUM, wq, xq, yq, element_area, ib, time_,
+      element_node, QUAD_NUM, wq, xq, yq, element_area, ib, time,
       time_step_size, N_old, a_N, f_N );
     adjust_backward_euler ( NODE_NUM, node_xy, NNODES, ELEMENT_NUM,
-      element_node, QUAD_NUM, wq, xq, yq, element_area, ib, time_,
+      element_node, QUAD_NUM, wq, xq, yq, element_area, ib, time,
       time_step_size, M_old, a_M, f_M );
 
     if ( false )
@@ -311,8 +331,8 @@ int main ( void )
 
 //  Modify the coefficient matrix and right hand side to account for
 //  boundary conditions.
-    adjust_boundary ( NODE_NUM, node_xy, node_boundary, ib, time_, a_N, f_N, NX, NY );
-    adjust_boundary ( NODE_NUM, node_xy, node_boundary, ib, time_, a_M, f_M, NX, NY );
+    adjust_boundary ( NODE_NUM, node_xy, node_boundary, ib, time, a_N, f_N, NX, NY );
+    adjust_boundary ( NODE_NUM, node_xy, node_boundary, ib, time, a_M, f_M, NX, NY );
 
     if ( false )
     {
@@ -351,19 +371,20 @@ int main ( void )
     grow(NODE_NUM, M, N, T, D, H);
     
 //  Increment the file name, and write the new solution.
-    time_unit << std::setw(14) << time_ << "\n";
+    time_unit << std::setw(14) << time << "\n";
 
     filename_inc ( &N_nutrients_name );
     filename_inc ( &M_nutrients_name );
     filename_inc ( &T_filename );
+    if(time_step%10 == 0){
+      save_mat(NODE_NUM, T, T_filename);
+      solution_write ( NODE_NUM, N, N_nutrients_name );
+    }
 
-    save_mat(NODE_NUM, T, T_filename);
-    solution_write ( NODE_NUM, N, N_nutrients_name );
-    solution_write ( NODE_NUM, M, M_nutrients_name );
+    //solution_write ( NODE_NUM, M, M_nutrients_name );
   }
 //
 //  Deallocate memory.
-//
   delete [] a_N;
   delete [] a_M;
   delete [] f_N;
@@ -374,8 +395,12 @@ int main ( void )
   delete [] N;
   delete [] N_exact;
   delete [] N_old;
+  delete [] M;
+  delete [] M_exact;
+  delete [] M_old;
   delete [] T;
   delete [] H;
+  delete [] D;
 
   time_unit.close ( );
 //
@@ -389,10 +414,4 @@ int main ( void )
   timestamp ( );
 
   return 0;
-# undef ELEMENT_NUM
-# undef NNODES
-# undef NODE_NUM
-# undef NX
-# undef NY
-# undef QUAD_NUM
 }
