@@ -6,12 +6,27 @@
 # include <fstream>
 # include <iostream>
 # include <iomanip>
-//# include <stdlib.h> //for malloc
+# include <stdlib.h> //for malloc
 # include "GeneratorLib/generatorlib.h"
 # include "FEM/fem2D.h"
 # include "constants.hpp"
 
 using namespace constants;
+double *a_N;
+double *a_M;
+double *f_N;
+double *f_M;
+double *N;
+double *M;
+double *N_exact;
+double *M_exact;
+double *N_old;
+double *M_old;
+int *pivot_N;
+int *pivot_M;
+int *T;
+int *D;
+int *H;
 
 int main ( void )
 
@@ -194,22 +209,23 @@ int main ( void )
   time_step_num = ITERATIONS;
   time_step_size = ( time_final - time_init ) / ( double ) ( time_step_num );
 //  Allocate space.
-  double *a_N = (double *) malloc(sizeof(double)*(3*ib+1)*NODE_NUM);
-  double *a_M=(double *) malloc(sizeof(double)*(3*ib+1)*NODE_NUM);
-  double *f_N=(double *) malloc(sizeof(double)*NODE_NUM);
-  double *f_M=(double *) malloc(sizeof(double)*NODE_NUM);
-  int *pivot_N=(int *) malloc(sizeof(int)*NODE_NUM);
-  int *pivot_M=(int *) malloc(sizeof(int)*NODE_NUM);
-  double *N=(double *) malloc(sizeof(double)*NODE_NUM);
-  double *N_exact=(double *) malloc(sizeof(double)*NODE_NUM);
-  double *N_old=(double *) malloc(sizeof(double)*NODE_NUM);
-  double *M_exact=(double *) malloc(sizeof(double)*NODE_NUM);
-  double *M_old=(double *) malloc(sizeof(double)*NODE_NUM);
-  double *M=(double *) malloc(sizeof(double)*NODE_NUM);
-  int *T=(int *) malloc(sizeof(int)*NODE_NUM);
-  int *D=(int *) malloc(sizeof(int)*NODE_NUM);
-  int *H=(int *) malloc(sizeof(int)*NODE_NUM);
-  
+
+  a_N = new double[(3*ib+1)*NODE_NUM];
+  a_M = new double[(3*ib+1)*NODE_NUM];
+  f_N = new double[NODE_NUM];
+  f_M = new double[NODE_NUM];
+  pivot_N = new int[NODE_NUM];
+  pivot_M = new int[NODE_NUM];
+  N = new double[NODE_NUM];
+  N_exact = new double[NODE_NUM];
+  N_old = new double[NODE_NUM];
+  M = new double[NODE_NUM];
+  M_exact = new double[NODE_NUM];
+  M_old = new double[NODE_NUM];
+
+  T = new int[NODE_NUM];
+  D = new int[NODE_NUM];
+  H = new int[NODE_NUM];
 
 //  Set the value of U at the initial time.
   time = time_init;
