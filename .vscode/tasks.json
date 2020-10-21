@@ -7,14 +7,23 @@
             "args": [
                 "-g",
                 //"Tests/neighbours.cpp",
-                //"Tests/evolve_test.cpp",
-                //"Tests/fem_test.cpp",
-                //"DELETE.cpp",
-                "MyFun/MyFun.cpp",
-                "Program.cpp",
+                //"Tests/evolve/evolve_test.cpp",
+                //"Tests/fem/fem_test.cpp",
+                //"Tests/getMat/getMat_test.cpp",
+                //"Tests/tumorBorder/tumorBorder_test.cpp",
+                //"Tests/get_coordinates_test.cpp",
+                //"Tests/get_squeare_test.cpp",
+                //"Tests/match_matrices_test.cpp",
+
+                "TumorGeneration.cpp",
+                "GeneratorLib/generatorlib.cpp",
                 "FEM/fem2D.cpp",
-                //"FEM/femMain.cpp",
-                //"Sucio/sucio.cpp",
+
+                //"TumorDestruction.cpp",
+                //"DestructionLib/destructionlib.cpp",
+                //"GeneratorLib/generatorlib.cpp",
+
+                //"Original/original.cpp",
                 
                 //"${file}",
                 "-o",

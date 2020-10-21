@@ -4,7 +4,7 @@
 #include <ctime>
 #include <vector>
 #include <fstream>
-#include "../MyFun/MyFun.h"
+#include "../GeneratorLib/generatorlib.h"
 
 
 int main() {
