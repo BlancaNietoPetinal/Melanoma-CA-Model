@@ -28,6 +28,37 @@ int *T;
 int *D;
 int *H;
 
+  double eh1;
+  double el2;
+  double element_area[ELEMENT_NUM];
+  int element_node[NNODES*ELEMENT_NUM];
+  int ib;
+  int ierr_N;
+  int ierr_M;
+  int job;
+  int node;
+  bool node_label;
+  int node_show;
+  double node_xy[2*NODE_NUM];
+  std::string folder = "Resultados/";
+  std::string node_txt_file_name = folder + "rectangle_nodes.txt";
+  std::string time_file_name = folder + "rectangle_time.txt";
+  std::string triangulation_txt_file_name = folder + "rectangle_elements.txt";
+  std::string N_nutrients_name = folder + "N/000.txt";
+  std::string M_nutrients_name = folder + "M/000.txt";
+  std::string T_filename = folder + "T/000.txt";
+  std::string D_name = folder + "D/000.txt";
+  std::string H_name = folder + "H/000.txt";
+  int triangle_show;
+  int *node_boundary=(int *) malloc(sizeof(int)*NODE_NUM);
+  double wq[QUAD_NUM];
+  double xl = 0.0;
+  double xq[QUAD_NUM*ELEMENT_NUM];
+  double xr = 1.0;
+  double yb = 0.0;
+  double yq[QUAD_NUM*ELEMENT_NUM];
+  double yt = 1.0;
+
 int main ( void )
 
 //****************************************************************************80
@@ -129,44 +160,13 @@ int main ( void )
 //    coordinates of the quadrature points in each element.
 //
 {
-
-  double eh1;
-  double el2;
-  double element_area[ELEMENT_NUM];
-  int element_node[NNODES*ELEMENT_NUM];
-  int ib;
-  int ierr_N;
-  int ierr_M;
-  int job;
-  int node;
-  bool node_label;
-  int node_show;
-  double node_xy[2*NODE_NUM];
   double time;
-  std::string folder = "Resultados/";
-  std::string node_txt_file_name = folder + "rectangle_nodes.txt";
-  std::string time_file_name = folder + "rectangle_time.txt";
-  std::string triangulation_txt_file_name = folder + "rectangle_elements.txt";
-  std::string N_nutrients_name = folder + "N/000.txt";
-  std::string M_nutrients_name = folder + "M/000.txt";
-  std::string T_filename = folder + "T/000.txt";
-  std::string D_name = folder + "D/000.txt";
-  std::string H_name = folder + "H/000.txt";
   double time_final;
   double time_init;
   int time_step;
   int time_step_num;
   double time_step_size;
   std::ofstream time_unit;
-  int triangle_show;
-  int *node_boundary=(int *) malloc(sizeof(int)*NODE_NUM);
-  double wq[QUAD_NUM];
-  double xl = 0.0;
-  double xq[QUAD_NUM*ELEMENT_NUM];
-  double xr = 1.0;
-  double yb = 0.0;
-  double yq[QUAD_NUM*ELEMENT_NUM];
-  double yt = 1.0;
 
   timestamp ( );
 
