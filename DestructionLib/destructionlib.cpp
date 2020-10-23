@@ -31,6 +31,9 @@ void get_limits(int * mat, int xsize, int ysize, int &left, int &right, int &sup
 void node_to_coordinates(int node, int &x, int &y, int xsize, int ysize){
     int n = 0;
     bool esc = 0;
+    if(node>=(xsize*ysize)){
+        std::cout<<"La matriw es demasiado pequena para albergar ese nodo.";
+    }
     for(int xcoor = 0; xcoor<xsize; xcoor++){
         for(int ycoor = 0; ycoor<ysize; ycoor++){
             if(n == node){
@@ -46,6 +49,24 @@ void node_to_coordinates(int node, int &x, int &y, int xsize, int ysize){
         }
     }
 };
+void coordinates_to_node(int &node, int x, int y, int xsize, int ysize){
+    int n=0;
+    bool esc = 0;
+    for(int xcoord = 0; xcoord<xsize; xcoord++){
+        for(int ycoord = 0; ycoord<ysize; ycoord++){
+            if( (xcoord==x) && (ycoord==y) ){
+                node = n;
+                esc = 1;
+                break;
+            }
+            n++;
+        }
+        if(esc){
+            break;
+        }
+    }
+}
+
 int leftBorder(int * mat, int size){
     int node = 0;
     while(mat[node]==0){
@@ -114,7 +135,6 @@ int * effectorCellPlacement(int leftnode, int rightnode, int supnode, int infnod
     match_matrices(T, mat, xsize, ysize);
     return mat;
 };
-
 int * get_squeare(int xleft, int xright, int ysup, int yinf, int xsize, int ysize){
     int node = 0;
     int * mat;
@@ -179,21 +199,25 @@ void cell_lysis(int * T, int *E, int node, int xsize, int ysize){
 };
 
 std::vector<int> n_neighbours(int n, int * mat, int node, int xsize, int ysize){ //intentar cambiarla por la que esta en Generation
-    // Fetches the n closest neighbours
-    std::vector<int> n_neighbours;
-    int x, y;
+    // Fetches the n closest neighbours returns a vector with the nodes
+    std::vector<int> neighbours;
+    int x, y, node2;
 
-    if(are_neighbours_interior(node, n, xsize, ysize)){  
-        node_to_coordinates(node, x, y, xsize, ysize);
-        for(int i = (x-n); i<(x+n); i++){
-            for(int j = (y-n); j<(y+n); j++){
-                
+    while(!are_neighbours_interior(node, n, xsize, ysize)){
+        n--;
+    }
+    
+    node_to_coordinates(node, x, y, xsize, ysize);
+
+    for(int i = (x-n); i<(x+n+1); i++){
+        for(int j = (y-n); j<(y+n+1); j++){
+            coordinates_to_node(node2, i, j, xsize, ysize); 
+            if( (mat[node2] == 1) && (node2!=node)){
+                neighbours.push_back(node2);
             }
         }
-
-        std::cout<<"OK"<<std::endl;
     }
-    return n_neighbours;
+    return neighbours;
 }; 
 
 bool are_neighbours_interior(int node, int n, int xsize, int ysize){

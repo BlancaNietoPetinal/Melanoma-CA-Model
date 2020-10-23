@@ -13,6 +13,7 @@ int superiorBorder(int * mat, int xsize, int ysize);
 int inferiorBorder(int * mat, int xsize, int ysize);
 int * effectorCellPlacement(int x0, int y0, int xf, int yf, int xsize, int ysize, int *T);
 void node_to_coordinates(int node, int &x, int &y, int xsize, int ysize);
+void coordinates_to_node(int &node, int x, int y, int xsize, int ysize);
 int * get_squeare(int xleft, int xright, int ysup, int yinf, int xsize, int ysize);
 void match_matrices(int * T, int * mat, int xsize, int ysize);
 
