@@ -14,7 +14,7 @@ void save_mat(int node_num, int mat[], std::string filename){
     }
     File.close();
 }
-void create_vec(int node_num, int mat[], int value){
+void create_vec(int node_num, int mat[], int value){ //poner un mensaje si node_num no es correcto
     for (int i = 0; i<node_num; i++) 
     {
         mat[i] = value;
@@ -70,7 +70,7 @@ void necrosis(double &M, int &T, int &D){
 void migracion(double M[], int T[], int D[], int H[], int node){
     std::default_random_engine generator{static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
     std::normal_distribution<double> distribution(0,MIG);
-    
+    std::uniform_int_distribution<> dice_distr(1,100);
     std::vector<int> neighbour_nodes, free_nodes;
     int neighbour_node, index;
     double rnd_n = distribution(generator), P;
@@ -80,7 +80,7 @@ void migracion(double M[], int T[], int D[], int H[], int node){
     free_neighbours(T, neighbour_nodes, free_nodes);
     if(P>abs(rnd_n)){
         if( !free_nodes.empty() ){ // room, pick random
-            index = rand() % free_nodes.size();
+            index = dice_distr(generator) % free_nodes.size();
             neighbour_node = free_nodes[index];
             if(T[node] > 1){
                 T[node]--;
@@ -118,6 +118,7 @@ void migracion(double M[], int T[], int D[], int H[], int node){
 void division(double N[], int T[], int D[], int H[], int node){
     std::default_random_engine generator{static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
     std::normal_distribution<double> distribution(0,DIV);
+    std::uniform_int_distribution<> dice_dist(1,100);
     std::vector<int> neighbour_nodes, free_nodes;
     int neighbour_node, index;
     double rnd_n = distribution(generator), P;
@@ -129,7 +130,7 @@ void division(double N[], int T[], int D[], int H[], int node){
             T[node]++;
         }
         else{
-            index = rand() % free_nodes.size(); //pick randomly
+            index = dice_dist(generator) % free_nodes.size(); //pick randomly
             neighbour_node = free_nodes[index];
             T[neighbour_node] = 1;
             if(H[neighbour_node] == 1){
