@@ -17,9 +17,9 @@ void coordinates_to_node(int &node, int x, int y, int xsize, int ysize);
 int * get_squeare(int xleft, int xright, int ysup, int yinf, int xsize, int ysize);
 void match_matrices(int * T, int * mat, int xsize, int ysize);
 
-void tumor_lysis(int * T, int * E, int *D, int xsize, int ysize);
+void tumor_lysis(int * T, int * E, int *Ecount, int *D, int xsize, int ysize);
 
-void cell_lysis(int * T, int *E, int node, int xsize , int ysize);
+void lysis(int * T, int *E, int *Ecount, int *D, int node, int xsize , int ysize);
 void recruitment();
 void inactivation();
 std::vector<int> n_neighbours(int n, int * mat, int node, int xsize, int ysize);

@@ -12,17 +12,17 @@ int main(){
 
 void test(){
     bool result = true;
-    int x, y;
+    int node;
 
-    get_coordinates(3,5,5,x,y);
-    if((x!=0) || (y!=2)){
+    coordinates_to_node(node,2,0,5,5);
+    if(node!=10){
         result = false;
-    };
+    }
 
-    get_coordinates(13,5,5,x,y);
-    if((x!=2) || (y!=2)){
+    coordinates_to_node(node,4,4,5,5);
+    if(node!=24){
         result = false;
-    };
+    }
 
     std::cout<<"Test: "<<result<<std::endl;
 }

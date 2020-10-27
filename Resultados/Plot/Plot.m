@@ -1,6 +1,6 @@
-NX = 50;
-NY = 50;
-NFrames = 90;
+NX = 70;
+NY = 70;
+NFrames = 150;
 %showMultipleFrames(NFrames,NX,NY);
 [T, N] = setFrame(NFrames, NX, NY);
 plotFrame(T, N)
@@ -40,10 +40,19 @@ function [mat1, mat2] = setFrame(frame, NX, NY)
     else
         framestr = int2str(frame);
     end
+    %ISAS COMPUTER RESULTS
     %mat1 = load (strcat('../../DELETE/T/',framestr,'.txt'));
     %mat2 = load (strcat('../../DELETE/N/',framestr,'.txt'));
-    mat1 = load (strcat('../T/effector90.txt'));
+    
+    %TEST
+    %mat1 = load (strcat('../../Tests/Sample/Ttest_6x6_15.txt'));
+    %mat2 = load (strcat('../../Tests/Sample/Ntest_6x6_15.txt'));
+
+    %RESULTS
+    %mat1 = load (strcat('../T/effector25.txt'));
+    mat1 = load (strcat('../T/',framestr,'.txt'));
     mat2 = load (strcat('../N/',framestr,'.txt'));
+    
     mat1 = reshape(mat1,[(2*NX-1), (2*NY-1)]);
     mat2 = reshape(mat2,[(2*NX-1), (2*NY-1)]);
 end

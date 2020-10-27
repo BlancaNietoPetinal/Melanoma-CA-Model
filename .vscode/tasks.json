@@ -14,13 +14,18 @@
                 //"Tests/get_coordinates_test.cpp",
                 //"Tests/get_squeare_test.cpp",
                 //"Tests/match_matrices_test.cpp",
+                //"Tests/node_to_coordinates_test.cpp",
+                //"Tests/are_neighbours_interior_test.cpp",
+                //"Tests/coordinates_to_node_test.cpp",
+                //"Tests/n_neighbours/n_neighbours_test.cpp",
+                //"Tests/lysis/lysis_test.cpp",
 
                 "TumorGeneration.cpp",
                 "GeneratorLib/generatorlib.cpp",
                 "FEM/fem2D.cpp",
 
                 //"TumorDestruction.cpp",
-                //"DestructionLib/destructionlib.cpp",
+                "DestructionLib/destructionlib.cpp",
                 //"GeneratorLib/generatorlib.cpp",
 
                 //"Original/original.cpp",

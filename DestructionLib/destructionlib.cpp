@@ -161,7 +161,7 @@ void match_matrices(int *T,int *mat, int xsize, int ysize){
     }
 };
 
-void tumor_lysis(int * T, int * E, int *D, int xsize, int ysize){
+void tumor_lysis(int * T, int * E, int *Ecount, int *D, int xsize, int ysize){
     std::default_random_engine generator{static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
     std::uniform_int_distribution<int> dice_distribution(1,3);
     int dice, node = 0;
@@ -171,10 +171,11 @@ void tumor_lysis(int * T, int * E, int *D, int xsize, int ysize){
         {
             if(E[node]==1){
                 dice = dice_distribution(generator);
+                dice = 1; //DELETE
                 switch (dice)
                 {
                 case 1:
-                    cell_lysis(T, E, node, xsize, ysize);
+                    lysis(T, E, Ecount, D, node, xsize, ysize);
                     break;
                 
                 case 2:
@@ -192,10 +193,28 @@ void tumor_lysis(int * T, int * E, int *D, int xsize, int ysize){
     }
 };
 
-void cell_lysis(int * T, int *E, int node, int xsize, int ysize){
-    std::vector<int> neighbours;
-    int N = 1;
-    //neighbours = n_neighbours(N, E, node, xsize, ysize);
+void lysis(int * T, int *E, int *Ecount, int *D, int node, int xsize, int ysize){
+    std::vector<int> Eneighbours, Tneighbours;
+    std::default_random_engine generator{static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
+    std::normal_distribution<double> distribution(0,LYS);
+    std::uniform_int_distribution<> u_distrib(1,50);
+    int NNEIG = 1, neignode, index;
+    double rnd_n = distribution(generator), P;
+
+    Eneighbours = n_neighbours(NNEIG, E, node, xsize, ysize);
+    Tneighbours = n_neighbours(1, T, node, xsize, ysize);
+    P = 1-exp(-pow(Eneighbours.size()/LYS,2));
+    P = 20; //DELETE
+    if( (P>abs(rnd_n)) && (Tneighbours.size()!=0) ){
+        index = u_distrib(generator) % Tneighbours.size();
+        neignode = Tneighbours[index];
+        T[neignode]--; D[neignode]++; Ecount[node]++;
+
+        if(Ecount[node]==3){
+            E[node] = 0; //celula sana
+        }
+    }
+
 };
 
 std::vector<int> n_neighbours(int n, int * mat, int node, int xsize, int ysize){ //intentar cambiarla por la que esta en Generation
