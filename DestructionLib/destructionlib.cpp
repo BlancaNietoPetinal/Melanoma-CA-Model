@@ -174,7 +174,7 @@ void tumor_lysis(int * T, int * E, int *Ecount, int *D, int *H, int xsize, int y
 
             if(E[node]==1){
                 
-                Tneighbours = get_specific_neighbours(T, node, 1, 1, xsize, ysize);
+                Tneighbours = get_specific_neighbours(T, node, 1, 0,'>', xsize, ysize);
                 if(Tneighbours.size()!=0){
                     lysis(T, E, Ecount, D, node, xsize, ysize);
                 }
@@ -209,8 +209,8 @@ void lysis(int * T, int *E, int *Ecount, int *D, int node, int xsize, int ysize)
     int NNEIG = 1, neignode, index;
     double rnd_n = distribution(generator), P;
 
-    Eneighbours = get_specific_neighbours(E, node, NNEIG, 1, xsize, ysize);
-    Tneighbours = get_specific_neighbours(T, node, 1, 1, xsize, ysize);
+    Eneighbours = get_specific_neighbours(E, node, NNEIG, 0, '>', xsize, ysize);
+    Tneighbours = get_specific_neighbours(T, node, 1, 0, '>', xsize, ysize);
     P = 1-exp(-pow(Eneighbours.size()/LYS,2));
     P = 30; //DELETE
     if( (P>abs(rnd_n)) && (Tneighbours.size()!=0) ){
@@ -263,18 +263,32 @@ void limits(int *mat, int node, int d, int &xmin, int &ymin, int &xmax, int &yma
 
 };
 
-std::vector<int> get_specific_neighbours(int *mat, int node, int d, int value,  int xsize, int ysize){
+std::vector<int> get_specific_neighbours(int *mat, int node, int d, int value, char mode,  int xsize, int ysize){
     std::vector<int> neighbour_nodes, specific_neighbour_nodes;
     neighbour_nodes = get_neighbours(mat, node, d, xsize, ysize);
 
     for(int i = 0; i<neighbour_nodes.size(); i++){
-        if(mat[neighbour_nodes[i]] == value){
-            specific_neighbour_nodes.push_back(neighbour_nodes[i]);
+        switch (mode)
+        {
+        case '=':
+            if((mat[neighbour_nodes[i]] == value)){
+                specific_neighbour_nodes.push_back(neighbour_nodes[i]);
+            }
+            break;
+        
+        case '>':
+            if(mat[neighbour_nodes[i]] > value){
+                specific_neighbour_nodes.push_back(neighbour_nodes[i]);
+            }
+            break;
+        case '<':
+            if(mat[neighbour_nodes[i]] < value){
+                specific_neighbour_nodes.push_back(neighbour_nodes[i]);
+            }
         }
     }
     return specific_neighbour_nodes;
 };
-
 
 void recruitment(int *T, int *E, int *D, int *H, int node, int xsize, int ysize){
     std::default_random_engine generator{static_cast<long unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count())};
@@ -283,12 +297,12 @@ void recruitment(int *T, int *E, int *D, int *H, int node, int xsize, int ysize)
     std::vector<int> Tneighbours, neighbours;
     int index, neignode;
 
-    Tneighbours = get_specific_neighbours(T, node, NEIGBOUR_NUMBER, 1, xsize, ysize);
+    Tneighbours = get_specific_neighbours(T, node, NEIGBOUR_NUMBER, 0, '>', xsize, ysize);
     double rnd_n = distribution(generator);
     double P = exp(-pow(1/(Tneighbours.size()*LYS),2));
 
     if(P>abs(rnd_n) && ((H[node] == 1) || (D[node] >= 1))){
-        neighbours = get_specific_neighbours(E, node, 1, 0, xsize, ysize);
+        neighbours = get_specific_neighbours(E, node, 1, 0, '=', xsize, ysize);
         index = u_distrib(generator) % neighbours.size();
         neignode = neighbours[index];
         D[neignode] = 0; H[neignode] = 0; E[neignode] = 1;
@@ -299,7 +313,7 @@ void inactivation(int *T, int *E, int *H, int node, int xsize, int ysize){
     std::normal_distribution<double> distribution(0,INC);
     std::vector<int> Tneighbours;
     double rnd_n = distribution(generator), P;
-    Tneighbours = get_specific_neighbours(T, node, 1, 1, xsize, ysize);
+    Tneighbours = get_specific_neighbours(T, node, 1, 0, '>', xsize, ysize);
     P = 1 - exp(- pow(1/(Tneighbours.size()*INC),2));
     if(P>abs(rnd_n)){
         E[node] = 0;
@@ -311,7 +325,7 @@ void Emigration(int *E, int *H, int node, int xsize, int ysize){
     std::uniform_int_distribution<int> u_distrib(0,100);
     std::vector<int> Hneighbours;
     int index, neignode;
-    Hneighbours = get_specific_neighbours(H, node, 1, 0, xsize, ysize);
+    Hneighbours = get_specific_neighbours(H, node, 1, 0, '=', xsize, ysize);
     index = u_distrib(generator) % Hneighbours.size();
     neignode = Hneighbours[index];
     E[node] = 0; E[neignode] = 1;

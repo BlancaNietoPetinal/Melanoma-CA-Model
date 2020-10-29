@@ -18,7 +18,7 @@ int * get_squeare(int xleft, int xright, int ysup, int yinf, int xsize, int ysiz
 void match_matrices(int * T, int * mat, int xsize, int ysize);
 std::vector<int> get_neighbours(int *mat, int node, int d, int xsize, int ysize);
 void limits(int *mat, int node, int d, int &xmin, int &ymin, int &xmax, int &ymax, int xsize, int ysize);
-std::vector<int> get_specific_neighbours(int *mat, int node, int d, int value, int xsize, int ysize);
+std::vector<int> get_specific_neighbours(int *mat, int node, int d, int value, char mode, int xsize, int ysize);
 
 void tumor_lysis(int * T, int * E, int *Ecount, int *D, int *H, int xsize, int ysize);
 
