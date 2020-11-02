@@ -10,6 +10,7 @@
 # include "GeneratorLib/generatorlib.h"
 # include "FEM/fem2D.h"
 # include "constants.hpp"
+# include "Tools/toolslib.h"
 
 using namespace constants;
 double *a_N;
@@ -28,36 +29,36 @@ int *T;
 int *D;
 int *H;
 
-  double eh1;
-  double el2;
-  double element_area[ELEMENT_NUM];
-  int element_node[NNODES*ELEMENT_NUM];
-  int ib;
-  int ierr_N;
-  int ierr_M;
-  int job;
-  int node;
-  bool node_label;
-  int node_show;
-  double node_xy[2*NODE_NUM];
-  std::string folder = "Resultados/";
-  std::string node_txt_file_name = folder + "rectangle_nodes.txt";
-  std::string time_file_name = folder + "rectangle_time.txt";
-  std::string triangulation_txt_file_name = folder + "rectangle_elements.txt";
-  std::string N_nutrients_name = folder + "N/000.txt";
-  std::string M_nutrients_name = folder + "M/000.txt";
-  std::string T_filename = folder + "T/000.txt";
-  std::string D_name = folder + "D/000.txt";
-  std::string H_name = folder + "H/000.txt";
-  int triangle_show;
-  int *node_boundary=(int *) malloc(sizeof(int)*NODE_NUM);
-  double wq[QUAD_NUM];
-  double xl = 0.0;
-  double xq[QUAD_NUM*ELEMENT_NUM];
-  double xr = 1.0;
-  double yb = 0.0;
-  double yq[QUAD_NUM*ELEMENT_NUM];
-  double yt = 1.0;
+double eh1;
+double el2;
+double element_area[ELEMENT_NUM];
+int element_node[NNODES*ELEMENT_NUM];
+int ib;
+int ierr_N;
+int ierr_M;
+int job;
+int node;
+bool node_label;
+int node_show;
+double node_xy[2*NODE_NUM];
+std::string folder = "Resultados/";
+std::string node_txt_file_name = folder + "rectangle_nodes.txt";
+std::string time_file_name = folder + "rectangle_time.txt";
+std::string triangulation_txt_file_name = folder + "rectangle_elements.txt";
+std::string N_nutrients_name = folder + "N/000.txt";
+std::string M_nutrients_name = folder + "M/000.txt";
+std::string T_filename = folder + "T/000.txt";
+std::string D_filename = folder + "D/000.txt";
+std::string H_filename = folder + "H/000.txt";
+int triangle_show;
+int *node_boundary=(int *) malloc(sizeof(int)*NODE_NUM);
+double wq[QUAD_NUM];
+double xl = 0.0;
+double xq[QUAD_NUM*ELEMENT_NUM];
+double xr = 1.0;
+double yb = 0.0;
+double yq[QUAD_NUM*ELEMENT_NUM];
+double yt = 1.0;
 
 int main ( void )
 
@@ -255,6 +256,7 @@ int main ( void )
 //creamos T H y E
     create_vec(NODE_NUM, T, 0);
     create_vec(NODE_NUM, H, 1);
+    create_vec(NODE_NUM, D, 0);
 
     T[int((2*NX -1)*(2*NY - 1)/2)] = 1;
     H[int((2*NX -1)*(2*NY - 1)/2)] = 0;
@@ -353,7 +355,7 @@ int main ( void )
     }
 
 // El tumor evoluciona
-    grow(NODE_NUM, M, N, T, D, H);
+    grow(M, N, T, D, H, 2*NX-1, 2*NY-1);
     
 //  Increment the file name, and write the new solution.
     time_unit << std::setw(14) << time << "\n";
@@ -361,10 +363,14 @@ int main ( void )
     filename_inc ( &N_nutrients_name );
     filename_inc ( &M_nutrients_name );
     filename_inc ( &T_filename );
+    filename_inc ( &D_filename );
+    filename_inc ( &H_filename );
   
   if(time_step%5==0){
       solution_write(NODE_NUM, N, N_nutrients_name);
       save_mat(NODE_NUM, T, T_filename);
+      save_mat(NODE_NUM, H, H_filename);
+      save_mat(NODE_NUM, D, D_filename);
   }
   }
 
