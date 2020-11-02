@@ -299,7 +299,7 @@ void area_set ( int node_num, double node_xy[], int nnodes,
 void assemble ( int node_num, double node_xy[], int nnodes, int element_num,
   int element_node[], int quad_num, double wq[], double xq[], double yq[],
   double element_area[], int ib, double time, double a[], double f[],
-  double u_old[], int T[], int H[], float lambda, double ALPHA  )
+  double u_old[], int T[], int H[], float lambda, double ALPHA )
 
 //****************************************************************************80*
 //
@@ -2635,8 +2635,7 @@ double rhs ( double x, double y, double time, double N_old, int T, int H,
 //
 {
   double value;
-  value = -lambda*pow(ALPHA,2)*T*N_old -pow(ALPHA,2)*H*N_old; //INTRODUCIR CEL CITOTOXICAS
-  //value = -pow(ALPHA,2)*N_old*(lambda*T +H); 
+  value = -pow(ALPHA,2)*N_old*(lambda*T + H);  //INTRODUCIR CEL CITOTOXICAS
   return value;
 }
 //****************************************************************************80

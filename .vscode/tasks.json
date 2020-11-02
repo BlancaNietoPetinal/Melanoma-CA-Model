@@ -6,7 +6,6 @@
             "command": "C:\\MinGW\\mingw32\\bin\\g++.exe",
             "args": [
                 "-g",
-                //"Tests/neighbours.cpp",
                 //"Tests/evolve/evolve_test.cpp",
                 //"Tests/fem/fem_test.cpp",
                 //"Tests/getMat/getMat_test.cpp",
@@ -15,18 +14,25 @@
                 //"Tests/get_squeare_test.cpp",
                 //"Tests/match_matrices_test.cpp",
                 //"Tests/node_to_coordinates_test.cpp",
-                //"Tests/are_neighbours_interior_test.cpp",
                 //"Tests/coordinates_to_node_test.cpp",
-                //"Tests/n_neighbours/n_neighbours_test.cpp",
                 //"Tests/lysis/lysis_test.cpp",
+                //"Tests/recruitment/recruitment_test.cpp",
+                //"Tests/Emigration/Emigration_test.cpp",
+                //"Tests/neighbours/neighbours_test.cpp",
+                //"Tests/summation_test.cpp",
+                //"Tests/inactivation/inactivation_test.cpp",
+                //"Tests/tumor_lysis/tumor_lysis_test.cpp",
+                //"Tests/DELETE/neig_comparison_test.cpp",
 
                 "TumorGeneration.cpp",
                 "GeneratorLib/generatorlib.cpp",
                 "FEM/fem2D.cpp",
+                "Tools/toolslib.cpp",
 
                 //"TumorDestruction.cpp",
-                "DestructionLib/destructionlib.cpp",
+                //"DestructionLib/destructionlib.cpp",
                 //"GeneratorLib/generatorlib.cpp",
+                //"Tools/toolslib.cpp",
 
                 //"Original/original.cpp",
                 

@@ -1,6 +1,6 @@
-NX = 10;
-NY = 10;
-NFrames =25;
+NX = 50;
+NY = 50;
+NFrames = 4s0;
 %showMultipleFrames(NFrames,NX,NY); 
 [T, N] = setFrame(NFrames, NX, NY);
 plotFrame(T, N)
@@ -14,7 +14,7 @@ end
 
 function plotFrame(mat1, mat2)
         set(gcf,'position',[140,140,1000,400]) % x0, y0, width, height
-        %colormap hot
+        colormap hot
         M1min = min(mat1(:));
         M1max = max(mat1(:));
         M2min = min(mat2(:));
@@ -45,16 +45,15 @@ function [mat1, mat2] = setFrame(frame, NX, NY)
     %mat2 = load (strcat('../../DELETE/N/',framestr,'.txt'));
     
     %TEST
-    %mat1 = load (strcat('../../Tests/DELETE/T.txt'));
-    %mat2 = load (strcat('../../Tests/DELETE/T.txt'));
+    %mat1 = load (strcat('../../Tests/tumor_lysis/T.txt'));
     %mat2 = load (strcat('../../Tests/tumor_lysis/E.txt'));
     %mat2 = load (strcat('../../Tests/Sample/Ntest_6x6_15.txt'));
 
     %RESULTS
     %mat1 = load (strcat('../T/effectorcount60.txt'));
     %mat2 = load (strcat('../T/destruction60.txt'));
-    mat1 = load (strcat('../H/',framestr,'.txt'));
-    mat2 = load (strcat('../H/',framestr,'.txt'));
+    mat1 = load (strcat('../T/',framestr,'.txt'));
+    mat2 = load (strcat('../N/',framestr,'.txt'));
     
     mat1 = reshape(mat1,[(2*NX-1), (2*NY-1)]);
     mat2 = reshape(mat2,[(2*NX-1), (2*NY-1)]);

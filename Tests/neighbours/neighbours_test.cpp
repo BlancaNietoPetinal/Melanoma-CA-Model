@@ -12,7 +12,7 @@ int main(){
     std::vector<int> neighbours;
     T = new int[NODE_NUM];
     T = getMat("Tests/Sample/Ttest_6x6_15.txt", NODE_NUM);
-    neighbours = get_specific_neighbours(T, node, d, 2, xsize, ysize);
+    neighbours = get_specific_neighbours(T, node, d, 0, '>', xsize, ysize);
 
     T[node] = -1;
     for(int i = 0; i<neighbours.size(); i++) {
