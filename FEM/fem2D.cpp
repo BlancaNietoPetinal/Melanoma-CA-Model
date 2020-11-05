@@ -1110,8 +1110,7 @@ void initial_nutrients ( int node_num, double node_xy[], double u[], int nx, int
   {
     for ( int i = 1; i <= 2 * nx - 1; i++ )
     {
-      if ( j == 1 ||
-           j == 2 * ny - 1)
+      if ( (j == 1 ) || (j == 2 * ny - 1))
       {
         u[node] = STARTING_NUTRIENTS;
       }

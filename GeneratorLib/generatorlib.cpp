@@ -1,6 +1,5 @@
 #include "generatorlib.h"
-
-
+#include <cmath>
 void grow(double M[], double N[], int T[], int D[], int H[], int xsize, int ysize){  
     int var;
     std::seed_seq seed{static_cast<long long>(std::chrono::high_resolution_clock::now()
@@ -8,7 +7,6 @@ void grow(double M[], double N[], int T[], int D[], int H[], int xsize, int ysiz
                                    .count()),
                             static_cast<long long>(reinterpret_cast<intptr_t>(&var))};
     std::mt19937 generator(seed);
-    //std::default_random_engine generator(seed);
     std::uniform_int_distribution<int> dice_distribution(1,3);
     int dice;
     for(int node = 0; node < xsize*ysize; node++)
@@ -41,12 +39,12 @@ void changeNegativeValue(double &value){
 }
 
 void necrosis(double M[], int T[], int D[], int node, std::mt19937 generator){
-    std::normal_distribution<double> distribution(0,1);
+    std::normal_distribution<double> distribution(0,M[node]/(T[node]*NEC));
+    //std::normal_distribution<double> distribution(0,1);
     double rnd_n = distribution(generator), P; 
     P = exp(- pow(M[node]/(T[node]*NEC) ,2));
     
-    if(P>abs(rnd_n)){ 
-        std::cout<<"NECROSIS: "<<P<<" Random: "<<rnd_n<<std::endl;
+    if(P>fabs(rnd_n)){ 
         T[node]--;
         if(T[node] == 0){
             D[node] = 1;
@@ -55,13 +53,16 @@ void necrosis(double M[], int T[], int D[], int node, std::mt19937 generator){
     return;
 }
 void migracion(double M[], int T[], int D[], int H[], int node, int xsize, int ysize, std::mt19937 generator){
-    std::normal_distribution<double> distribution(0,1);
-    std::uniform_int_distribution<> dice_distr(1,50);
+    std::normal_distribution<double> distribution(0,(pow(T[node],1/2) * M[node])/MIG); 
+    //std::normal_distribution<double> distribution(0,1);
+    std::uniform_int_distribution<int> dice_distr(1,50);
     std::vector<int> neighbour_nodes, free_nodes;
     int neighbour_node, index;
     double rnd_n = distribution(generator);
     double P = 1 - exp( - (T[node] * pow(M[node]/MIG,2)));
-    if(P>abs(rnd_n)){
+    P = 0;
+    if(P>fabs(rnd_n)){
+        std::cout<<"MIGRACION: "<<P<<" rand: "<<rnd_n<<std::endl;
         neighbour_nodes = get_neighbours(T, node, 1, xsize, ysize);
         free_nodes = get_specific_neighbours(T, node, 1, 0, '=', xsize, ysize);
         if( !free_nodes.empty() ){ // room, pick random
@@ -103,15 +104,17 @@ void migracion(double M[], int T[], int D[], int H[], int node, int xsize, int y
     }
 };
 void division(double N[], int T[], int D[], int H[], int node, int xsize, int ysize, std::mt19937 generator){
-    std::normal_distribution<double> distribution(0,1);
+    std::normal_distribution<double> distribution(0,N[node]/(T[node]*DIV));
+    //std::normal_distribution<double> distribution(0,1);
     std::uniform_int_distribution<int> dice_dist(1,50);
     std::vector<int> free_nodes;
     
     int neighbour_node, index;
     double rnd_n = distribution(generator), P;
-    P = 1 - exp( - pow(N[node]/(T[node]*DIV), 2));
 
-    if(P>abs(rnd_n)){
+    P = 1 - exp( - pow(N[node]/(T[node]*DIV), 2));
+    //std::cout<<"P: "<<P<<" Random: "<<fabs(rnd_n)<<std::endl;
+    if(P>fabs(rnd_n)){
         free_nodes = get_specific_neighbours(T,node,1,0,'=',xsize,ysize);
         if( free_nodes.empty() ){
             T[node]++;

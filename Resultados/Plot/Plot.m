@@ -1,6 +1,6 @@
-NX = 10;
-NY = 10;
-NFrames =25;
+NX = 60;
+NY = 60;
+NFrames =500;
 %showMultipleFrames(NFrames,NX,NY); 
 [T, N] = setFrame(NFrames, NX, NY);
 plotFrame(T, N)
@@ -53,8 +53,8 @@ function [mat1, mat2] = setFrame(frame, NX, NY)
     %RESULTS
     %mat1 = load (strcat('../T/effectorcount60.txt'));
     %mat2 = load (strcat('../T/destruction60.txt'));
-    mat1 = load (strcat('../H/',framestr,'.txt'));
-    mat2 = load (strcat('../H/',framestr,'.txt'));
+    mat1 = load (strcat('../T/',framestr,'.txt'));
+    mat2 = load (strcat('../N/',framestr,'.txt'));
     
     mat1 = reshape(mat1,[(2*NX-1), (2*NY-1)]);
     mat2 = reshape(mat2,[(2*NX-1), (2*NY-1)]);
