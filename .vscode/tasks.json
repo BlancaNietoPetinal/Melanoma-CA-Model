@@ -23,6 +23,8 @@
                 //"Tests/inactivation/inactivation_test.cpp",
                 //"Tests/tumor_lysis/tumor_lysis_test.cpp",
                 //"Tests/DELETE/neig_comparison_test.cpp",
+                //"Tests/get_random_nodes_test.cpp",
+                //"Tests/is_tumor_in_border_test.cpp",
 
                 //"DELETE/DELETE.cpp",
 

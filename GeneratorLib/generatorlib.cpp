@@ -1,5 +1,5 @@
 #include "generatorlib.h"
-#include <cmath>
+
 
 void grow(double M[], double N[], int T[], int D[], int H[], int xsize, int ysize){  
     int var;
@@ -61,10 +61,9 @@ void migracion(double M[], int T[], int D[], int H[], int node, int xsize, int y
     double P = 1 - exp( - (T[node] * pow(M[node]/MIG,2)));
     P = 0;
     if(P>fabs(rnd_n)){
-        std::cout<<"MIGRACION: "<<P<<" rand: "<<rnd_n<<std::endl;
         neighbour_nodes = get_neighbours(T, node, 1, xsize, ysize);
         free_nodes = get_specific_neighbours(T, node, 1, 0, '=', xsize, ysize);
-        if( !free_nodes.empty() ){ // room, pick random
+        if( !free_nodes.empty() ){
             index = dice_distr(generator) % free_nodes.size();
             neighbour_node = free_nodes[index];
             if(T[node] > 1){

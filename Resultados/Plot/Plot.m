@@ -1,6 +1,6 @@
-NX = 60;
-NY = 60;
-NFrames =500;
+NX = 50;
+NY = 50;
+NFrames = 160;
 %showMultipleFrames(NFrames,NX,NY); 
 [T, N] = setFrame(NFrames, NX, NY);
 plotFrame(T, N)
