@@ -4,6 +4,7 @@
 #include <random>
 #include <chrono>
 #include <array>
+#include <algorithm>
 
 int * get_mat(std::string filename, int matlen){
     int * mat;
@@ -141,3 +142,30 @@ void save_mat(int node_num, int mat[], std::string filename){
     }
     File.close();
 }
+
+int* get_random_nodes(int xsize, int ysize){
+    int* random_nodes;
+    random_nodes = new int[xsize*ysize];
+
+    for(int node = 0; node < (xsize*ysize); node++){
+        random_nodes[node] = node;
+    }
+    std::random_shuffle(&random_nodes[0], &random_nodes[xsize*ysize]);
+    return random_nodes;
+}
+
+bool is_tumor_in_border(int *mat, int xsize, int ysize){ //cambiar nombre
+    bool result=false;
+    int node = 0;
+    for(int x = 0; x<xsize; x++){
+        for(int y = 0; y<ysize; y++){
+            if( (x==0) || (y==0) || (x==(xsize-1)) || (y==(ysize-1))){
+                if(mat[node] != 0){
+                    result = true;
+                }
+            }
+            node++;
+        }
+    }
+    return result;
+};

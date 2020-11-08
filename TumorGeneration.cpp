@@ -367,10 +367,13 @@ int main ( void )
     filename_inc ( &H_filename );
   
   if(time_step%10==0){
-      solution_write(NODE_NUM, N, N_nutrients_name);
-      save_mat(NODE_NUM, T, T_filename);
-      save_mat(NODE_NUM, H, H_filename);
-      save_mat(NODE_NUM, D, D_filename);
+    solution_write(NODE_NUM, N, N_nutrients_name);
+    save_mat(NODE_NUM, T, T_filename);
+    save_mat(NODE_NUM, H, H_filename);
+    save_mat(NODE_NUM, D, D_filename);
+  }
+  if(is_tumor_in_border(T,2*NX - 1,2*NY - 1)){
+    break;
   }
   }
 

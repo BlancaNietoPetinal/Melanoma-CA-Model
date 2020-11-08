@@ -13,3 +13,5 @@ void limits(int *mat, int node, int d, int &xmin, int &ymin, int &xmax, int &yma
 std::vector<int> get_specific_neighbours(int *mat, int node, int d, int value, char mode, int xsize, int ysize);
 void create_vec(int node_num, int mat[], int value);
 void save_mat(int node_num, int mat[], std::string filename);
+int* get_random_nodes(int xsize, int ysize);
+bool is_tumor_in_border(int *mat, int xsize, int ysize);
