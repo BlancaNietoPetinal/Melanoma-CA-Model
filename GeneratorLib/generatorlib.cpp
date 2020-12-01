@@ -33,12 +33,7 @@ void grow(double M[], double N[], int T[], int D[], int H[], int xsize, int ysiz
         }
     }    
 }
-void changeNegativeValue(double &value){
-    if(value<0){
-        value = 0;
-    }
-    return;
-}
+
 void necrosis(double M[], int T[], int D[], int node, std::mt19937 generator){
     std::normal_distribution<double> distribution(0,1);
     double rnd_n = distribution(generator), P; 

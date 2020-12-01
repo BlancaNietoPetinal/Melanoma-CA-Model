@@ -28,7 +28,6 @@ int *pivot_M;
 int *T;
 int *D;
 int *H;
-
 double eh1;
 double el2;
 double element_area[ELEMENT_NUM];
@@ -122,7 +121,7 @@ int main ( void )
 
   time_unit.open ( time_file_name.c_str ( ) );
 
-  //time_unit << "  " << std::setw(14) << time << "\n";
+  time_unit << "  " << std::setw(14) << time << "\n"; //se puede quitar?
 
   // creamos T H y D
   create_vec(NODE_NUM, T, 0);
@@ -132,7 +131,6 @@ int main ( void )
   // posicionamos una celula T
   T[int((2*NX -1)*(2*NY - 1)/2)] = 1;
   H[int((2*NX -1)*(2*NY - 1)/2)] = 0;
-
 
   solution_write ( NODE_NUM, N, N_nutrients_name );
   solution_write ( NODE_NUM, M, M_nutrients_name );
@@ -183,14 +181,16 @@ int main ( void )
     grow(M, N, T, D, H, 2*NX-1, 2*NY-1);
     
     //  Incremento del filename y guardar la solucion
+    time_unit << std::setw(14) << time << "\n"; //se puede quitar??
     filename_inc ( &N_nutrients_name );
     filename_inc ( &M_nutrients_name );
     filename_inc ( &T_filename );
     filename_inc ( &D_filename );
     filename_inc ( &H_filename );
   
-    if(time_step%10==0){
+    if(time_step%5==0){
       solution_write(NODE_NUM, N, N_nutrients_name);
+      solution_write(NODE_NUM, M, M_nutrients_name);
       save_mat(NODE_NUM, T, T_filename);
       save_mat(NODE_NUM, H, H_filename);
       save_mat(NODE_NUM, D, D_filename);

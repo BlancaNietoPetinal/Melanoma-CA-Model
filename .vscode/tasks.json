@@ -25,18 +25,19 @@
                 //"Tests/DELETE/neig_comparison_test.cpp",
                 //"Tests/get_random_nodes_test.cpp",
                 //"Tests/is_tumor_in_border_test.cpp",
+                //"Tests/rk4_test.cpp",
 
-                //"DELETE/DELETE.cpp",
+                //"Tests/DELETE/DELETE.cpp",
 
-                "TumorGeneration.cpp",
-                "GeneratorLib/generatorlib.cpp",
-                "FEM/fem2D.cpp",
-                "Tools/toolslib.cpp",
-
-                //"TumorDestruction.cpp",
-                //"DestructionLib/destructionlib.cpp",
+                //"TumorGeneration.cpp",
                 //"GeneratorLib/generatorlib.cpp",
+                //"FEM/fem2D.cpp",
                 //"Tools/toolslib.cpp",
+
+                "TumorDestruction.cpp",
+                "DestructionLib/destructionlib.cpp",
+                "Tools/toolslib.cpp",
+                "RK4/rk4lib.cpp",
 
                 //"Original/original.cpp",
                 

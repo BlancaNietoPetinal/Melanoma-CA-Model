@@ -11,7 +11,7 @@
 #include "../constants.hpp"
 #include "../Tools/toolslib.h"
 
-using namespace constants;
+using namespace constants; //quitar???
 
 void necrosis(double M[], int T[], int D[], int node, std::mt19937 generator);
 void division(double N[], int T[],  int D[], int H[], int node, int xsize, int ysize, std::mt19937 generator);

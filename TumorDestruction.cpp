@@ -3,34 +3,61 @@
 # include <iostream>
 # include "DestructionLib/destructionlib.h"
 # include "Tools/toolslib.h"
-# include "GeneratorLib/generatorlib.h"
+# include "RK4/rk4lib.h"
 
 # include "constants.hpp"
 using namespace constants;
 
-int *T, *E, *Ecount, *D, *H, leftLimitCell, rightLimitCell, superiorLimitCell, inferiorLimitCell;
+int *T, *Ecount, *D, *H, leftLimitCell, rightLimitCell, superiorLimitCell, inferiorLimitCell;
+double *Td, *Hd, *Ed, *Dd, *Sol;
 int xsize = 2*NX-1, ysize = 2*NY-1;
 int main(){
     T = new int[NODE_NUM];
-    E = new int[NODE_NUM];
     Ecount = new int[NODE_NUM];
     D = new int[NODE_NUM];
     H = new int[NODE_NUM];
 
-    T = get_mat("Resultados/T/0"+std::to_string(ITERATIONS)+".txt", NODE_NUM);
+    Td = new double[NODE_NUM];
+    Hd = new double[NODE_NUM];
+    Ed = new double[NODE_NUM];
+    Dd = new double[NODE_NUM];
+    Sol = new double[NODE_NUM];
+
+    create_vec(NODE_NUM, Ecount, 0);
+    create_vec(NODE_NUM, D, 0);
+    T = get_mat("Tests/Sample/Ttest_50x50_230.txt", NODE_NUM); //Ttest_6x6_20.txt
+    H = get_mat("Tests/Sample/Htest_50x50_230.txt", NODE_NUM); //Htest_6x6_20.txt
     
     //suggestion usar std::tuple para obtener los valores
-    get_tumor_limits(T, xsize, ysize, leftLimitCell, rightLimitCell, superiorLimitCell, inferiorLimitCell);
+    Td = int_2_double(T, NODE_NUM);
+    Hd = int_2_double(H, NODE_NUM);
+    
+    get_tumor_limits(Td, xsize, ysize, leftLimitCell, rightLimitCell, superiorLimitCell, inferiorLimitCell);
    
-    E = effectorCellPlacement(leftLimitCell, rightLimitCell, superiorLimitCell, inferiorLimitCell, 2*NX-1, 2*NY-1, T);
-    for(int i=0; i<20; i++){
-        tumor_lysis(T, E, Ecount, D, H, xsize, ysize);
+    Ed = effectorCellPlacement(leftLimitCell, rightLimitCell, superiorLimitCell, inferiorLimitCell, 2*NX-1, 2*NY-1, Td);
+
+    for(int i=0; i<11; i++){
+        tumor_lysis(Td, Ed, Ecount, Dd, Hd, xsize, ysize);
+        for(int node=0; node<NODE_NUM; node++){
+            Sol = RK4(Td[node], Hd[node], Ed[node]);
+            Td[node] = Sol[0];
+            Hd[node] = Sol[1];
+            Ed[node] = Sol[2];
+        }
+        save_mat(NODE_NUM, Td, "ResultadosDestruction/T/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Ed, "ResultadosDestruction/E/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Ecount, "ResultadosDestruction/Ecount/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Hd, "ResultadosDestruction/H/"+std::to_string(i)+".txt");
+
     }
     
-    save_mat(NODE_NUM, E, "Resultados/T/effector"+std::to_string(ITERATIONS)+".txt");
-    save_mat(NODE_NUM, Ecount, "Resultados/T/effectorcount"+std::to_string(ITERATIONS)+".txt");
-    save_mat(NODE_NUM, T, "Resultados/T/destruction"+std::to_string(ITERATIONS)+".txt");
-    delete [] E;
+    delete [] Ed;
+    delete [] Ecount;
+    delete [] D;
+    delete [] Dd;
+    delete [] H;
+    delete [] Hd;
     delete [] T;
+    delete [] Td;
     return 0;
 }
