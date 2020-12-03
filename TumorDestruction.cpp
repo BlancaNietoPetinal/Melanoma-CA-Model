@@ -1,10 +1,9 @@
 //Accion de las celulas citotoxicas T
 
 # include <iostream>
-# include "DestructionLib/destructionlib.h"
-# include "Tools/toolslib.h"
-# include "RK4/rk4lib.h"
-
+# include "Libraries/DestructionLib/destructionlib.h"
+# include "Libraries/Tools/toolslib.h"
+# include "Libraries/RK4/rk4lib.h"
 # include "constants.hpp"
 using namespace constants;
 
@@ -25,8 +24,8 @@ int main(){
 
     create_vec(NODE_NUM, Ecount, 0);
     create_vec(NODE_NUM, D, 0);
-    T = get_mat("Tests/Sample/Ttest_50x50_230.txt", NODE_NUM); //Ttest_6x6_20.txt
-    H = get_mat("Tests/Sample/Htest_50x50_230.txt", NODE_NUM); //Htest_6x6_20.txt
+    T = get_mat("Results/Generation/T/030.txt", NODE_NUM); 
+    H = get_mat("Results/Generation/H/030.txt", NODE_NUM); 
     
     //suggestion usar std::tuple para obtener los valores
     Td = int_2_double(T, NODE_NUM);
@@ -36,7 +35,7 @@ int main(){
    
     Ed = effectorCellPlacement(leftLimitCell, rightLimitCell, superiorLimitCell, inferiorLimitCell, 2*NX-1, 2*NY-1, Td);
 
-    for(int i=0; i<11; i++){
+    for(int i=0; i<DESTRUCTION_IT; i++){
         tumor_lysis(Td, Ed, Ecount, Dd, Hd, xsize, ysize);
         for(int node=0; node<NODE_NUM; node++){
             Sol = RK4(Td[node], Hd[node], Ed[node]);
@@ -44,11 +43,12 @@ int main(){
             Hd[node] = Sol[1];
             Ed[node] = Sol[2];
         }
-        save_mat(NODE_NUM, Td, "ResultadosDestruction/T/"+std::to_string(i)+".txt");
-        save_mat(NODE_NUM, Ed, "ResultadosDestruction/E/"+std::to_string(i)+".txt");
-        save_mat(NODE_NUM, Ecount, "ResultadosDestruction/Ecount/"+std::to_string(i)+".txt");
-        save_mat(NODE_NUM, Hd, "ResultadosDestruction/H/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Td, "Results/Destruction/T/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Ed, "Results/Destruction/E/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Ecount, "Results/Destruction/Ecount/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Hd, "Results/Destruction/H/"+std::to_string(i)+".txt");
 
+        if(noTumorCells(Td, NODE_NUM))break;
     }
     
     delete [] Ed;

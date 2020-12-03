@@ -6,6 +6,17 @@
             "command": "C:\\MinGW\\mingw32\\bin\\g++.exe",
             "args": [
                 "-g",
+
+                //"TumorGeneration.cpp",
+                //"Libraries/GeneratorLib/generatorlib.cpp",
+                //"Libraries/FEM/fem2D.cpp",
+
+                "TumorDestruction.cpp",
+                "Libraries/DestructionLib/destructionlib.cpp",
+                "Libraries/RK4/rk4lib.cpp",
+
+                "Libraries/Tools/toolslib.cpp",
+                //"Original/original.cpp",
                 //"Tests/evolve/evolve_test.cpp",
                 //"Tests/fem/fem_test.cpp",
                 //"Tests/getMat/getMat_test.cpp",
@@ -28,18 +39,6 @@
                 //"Tests/rk4_test.cpp",
 
                 //"Tests/DELETE/DELETE.cpp",
-
-                //"TumorGeneration.cpp",
-                //"GeneratorLib/generatorlib.cpp",
-                //"FEM/fem2D.cpp",
-                //"Tools/toolslib.cpp",
-
-                "TumorDestruction.cpp",
-                "DestructionLib/destructionlib.cpp",
-                "Tools/toolslib.cpp",
-                "RK4/rk4lib.cpp",
-
-                //"Original/original.cpp",
                 
                 //"${file}",
                 "-o",

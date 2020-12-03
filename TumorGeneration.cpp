@@ -7,10 +7,10 @@
 # include <iostream>
 # include <iomanip>
 //# include <stdlib.h> //malloc
-# include "GeneratorLib/generatorlib.h"
-# include "FEM/fem2D.h"
 # include "constants.hpp"
-# include "Tools/toolslib.h"
+# include "Libraries/GeneratorLib/generatorlib.h"
+# include "Libraries/FEM/fem2D.h"
+# include "Libraries/Tools/toolslib.h"
 
 using namespace constants;
 double *a_N;
@@ -40,7 +40,7 @@ int node;
 bool node_label;
 int node_show;
 double node_xy[2*NODE_NUM];
-std::string folder = "Resultados/";
+std::string folder = "Results/Generation/";
 std::string node_txt_file_name = folder + "rectangle_nodes.txt";
 std::string time_file_name = folder + "rectangle_time.txt";
 std::string triangulation_txt_file_name = folder + "rectangle_elements.txt";
@@ -87,7 +87,7 @@ int main ( void )
   // tiempos
   time_init = 0.0;
   time_final = 0.5;
-  time_step_num = ITERATIONS;
+  time_step_num = GENERATION_IT;
   time_step_size = ( time_final - time_init ) / ( double ) ( time_step_num );
 
   // asignacion de memoria
@@ -188,7 +188,7 @@ int main ( void )
     filename_inc ( &D_filename );
     filename_inc ( &H_filename );
   
-    if(time_step%5==0){
+    if(time_step%10==0){
       solution_write(NODE_NUM, N, N_nutrients_name);
       solution_write(NODE_NUM, M, M_nutrients_name);
       save_mat(NODE_NUM, T, T_filename);
