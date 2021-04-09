@@ -23,3 +23,5 @@ int* get_random_nodes(int xsize, int ysize);
 bool is_tumor_in_border(int *mat, int xsize, int ysize);
 void changeNegativeValue(double &value);
 double* int_2_double(int mat[], int matlen);
+int cell_counter(int mat[], int node_num);
+int cell_counter(double mat[], int node_num);

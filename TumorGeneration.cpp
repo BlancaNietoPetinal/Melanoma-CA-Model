@@ -112,7 +112,7 @@ int main ( void )
   // creamos matrices de nutrientes
   initial_nutrients ( NODE_NUM, node_xy, N_exact, NX, NY);
   initial_nutrients ( NODE_NUM, node_xy, M_exact, NX, NY);
-
+  solution_write(NODE_NUM, N, "N/initial_nut");
   for ( node = 0; node < NODE_NUM; node++ )
   {
     N[node] = N_exact[node];
@@ -129,8 +129,8 @@ int main ( void )
   create_vec(NODE_NUM, D, 0);
 
   // posicionamos una celula T
-  T[int((2*NX -1)*(2*NY - 1)/2)] = 1;
-  H[int((2*NX -1)*(2*NY - 1)/2)] = 0;
+  //T[int((2*NX -1)*(2*NY - 1)/2)] = 1;
+  //H[int((2*NX -1)*(2*NY - 1)/2)] = 0;
 
   solution_write ( NODE_NUM, N, N_nutrients_name );
   solution_write ( NODE_NUM, M, M_nutrients_name );
@@ -188,7 +188,7 @@ int main ( void )
     filename_inc ( &D_filename );
     filename_inc ( &H_filename );
   
-    if(time_step%10==0){
+    if(time_step%1==0){
       solution_write(NODE_NUM, N, N_nutrients_name);
       solution_write(NODE_NUM, M, M_nutrients_name);
       save_mat(NODE_NUM, T, T_filename);

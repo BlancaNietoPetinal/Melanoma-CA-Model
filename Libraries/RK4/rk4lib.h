@@ -6,6 +6,7 @@
 using namespace constants;
 
 double* RK4(double T, double H, double E);
+//double K(double *E, double *T);
 double f1(double t, double T,double H,double E);
 double f2(double t, double T,double H,double E);
 double f3(double t, double T,double H,double E);

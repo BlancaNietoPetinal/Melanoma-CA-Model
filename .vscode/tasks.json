@@ -17,6 +17,7 @@
 
                 "Libraries/Tools/toolslib.cpp",
                 //"Original/original.cpp",
+                
                 //"Tests/evolve/evolve_test.cpp",
                 //"Tests/fem/fem_test.cpp",
                 //"Tests/getMat/getMat_test.cpp",
@@ -37,8 +38,9 @@
                 //"Tests/get_random_nodes_test.cpp",
                 //"Tests/is_tumor_in_border_test.cpp",
                 //"Tests/rk4_test.cpp",
-
-                //"Tests/DELETE/DELETE.cpp",
+                //"Tests/cell_counter.cpp",
+                //"Tests/effectorCellPlacement1.cpp",
+                //"Tests/DELETE.cpp",
                 
                 //"${file}",
                 "-o",

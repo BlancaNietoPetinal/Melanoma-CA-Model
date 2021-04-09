@@ -23,7 +23,6 @@ int * get_mat(std::string filename, int matlen){
     }
     return mat;
 };
-
 void node_to_coordinates(int node, int &x, int &y, int xsize, int ysize){
     int n = 0;
     bool esc = 0;
@@ -62,7 +61,6 @@ void coordinates_to_node(int &node, int x, int y, int xsize, int ysize){
         }
     }
 }
-
 std::vector<int> get_neighbours(int *mat, int node, int d, int xsize, int ysize){ //devolver puntero??
     // devuelve los n vecinos
     std::vector<int> neighbour_nodes;
@@ -127,7 +125,6 @@ std::vector<int> get_specific_neighbours(int *mat, int node, int d, int value, c
 
     return specific_neighbour_nodes;
 };
-
 std::vector<int> get_neighbours(double *mat, int node, int d, int xsize, int ysize){ //devolver puntero??
     // devuelve los n vecinos
     std::vector<int> neighbour_nodes;
@@ -192,14 +189,12 @@ std::vector<int> get_specific_neighbours(double *mat, int node, int d, int value
 
     return specific_neighbour_nodes;
 };
-
 void create_vec(int node_num, int mat[], int value){ //poner un mensaje si node_num no es correcto
     for (int i = 0; i<node_num; i++) 
     {
         mat[i] = value;
     }
 }
-
 void save_mat(int node_num, int mat[], std::string filename){
     std::ofstream File(filename); 
     for(int node = 0; node<node_num; node++){
@@ -214,7 +209,6 @@ void save_mat(int node_num, float mat[], std::string filename){ //quitar y usar 
     }
     File.close();
 }
-
 void save_mat(int node_num, double mat[], std::string filename){
     std::ofstream File(filename); 
     for(int node = 0; node<node_num; node++){
@@ -222,16 +216,12 @@ void save_mat(int node_num, double mat[], std::string filename){
     }
     File.close();
 }
-
-
 void changeNegativeValue(double &value){
     if(value<0){
         value = 0;
     }
     return;
 }
-
-
 int* get_random_nodes(int xsize, int ysize){
     int* random_nodes;
     random_nodes = new int[xsize*ysize];
@@ -242,7 +232,6 @@ int* get_random_nodes(int xsize, int ysize){
     std::random_shuffle(&random_nodes[0], &random_nodes[xsize*ysize]);
     return random_nodes;
 }
-
 bool is_tumor_in_border(int *mat, int xsize, int ysize){ //cambiar nombre
     bool result=false;
     int node = 0;
@@ -258,7 +247,6 @@ bool is_tumor_in_border(int *mat, int xsize, int ysize){ //cambiar nombre
     }
     return result;
 };
-
 double* int_2_double(int mat[], int matlen){
     double* matd;
     matd = new double[NODE_NUM];
@@ -266,4 +254,20 @@ double* int_2_double(int mat[], int matlen){
         matd[node] = (double)mat[node];
     }
     return matd;
+};
+
+int cell_counter(int mat[], int node_num){
+    int n_cells = 0;
+    for(int node = 0;node<node_num; node++){
+        n_cells = n_cells + mat[node];
+    };
+    return n_cells;
+};
+
+int cell_counter(double mat[], int node_num){
+    int n_cells = 0;
+    for(int node = 0;node<node_num; node++){
+        n_cells = n_cells + mat[node];
+    };
+    return n_cells;
 };

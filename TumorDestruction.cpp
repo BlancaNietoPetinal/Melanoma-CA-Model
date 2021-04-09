@@ -8,8 +8,8 @@
 using namespace constants;
 
 int *T, *Ecount, *D, *H, leftLimitCell, rightLimitCell, superiorLimitCell, inferiorLimitCell;
-double *Td, *Hd, *Ed, *Dd, *Sol;
-int xsize = 2*NX-1, ysize = 2*NY-1;
+double *Td, *Hd, *Ed, *Dd, *Sol, r;
+int xsize = 2*NX-1, ysize = 2*NY-1, Tdi, Tdf;
 int main(){
     T = new int[NODE_NUM];
     Ecount = new int[NODE_NUM];
@@ -24,17 +24,17 @@ int main(){
 
     create_vec(NODE_NUM, Ecount, 0);
     create_vec(NODE_NUM, D, 0);
-    T = get_mat("Results/Generation/T/030.txt", NODE_NUM); 
-    H = get_mat("Results/Generation/H/030.txt", NODE_NUM); 
+    T = get_mat("Results/Filamentary/T/200.txt", NODE_NUM); 
+    H = get_mat("Results/Filamentary/H/200.txt", NODE_NUM); 
     
     //suggestion usar std::tuple para obtener los valores
     Td = int_2_double(T, NODE_NUM);
     Hd = int_2_double(H, NODE_NUM);
-    
+    Tdi = cell_counter(Td,NODE_NUM);
     get_tumor_limits(Td, xsize, ysize, leftLimitCell, rightLimitCell, superiorLimitCell, inferiorLimitCell);
    
     Ed = effectorCellPlacement(leftLimitCell, rightLimitCell, superiorLimitCell, inferiorLimitCell, 2*NX-1, 2*NY-1, Td);
-
+    save_mat(NODE_NUM, Ed, "Results/Destruction/E/initial_rectangle.txt");
     for(int i=0; i<DESTRUCTION_IT; i++){
         tumor_lysis(Td, Ed, Ecount, Dd, Hd, xsize, ysize);
         for(int node=0; node<NODE_NUM; node++){
@@ -47,10 +47,13 @@ int main(){
         save_mat(NODE_NUM, Ed, "Results/Destruction/E/"+std::to_string(i)+".txt");
         save_mat(NODE_NUM, Ecount, "Results/Destruction/Ecount/"+std::to_string(i)+".txt");
         save_mat(NODE_NUM, Hd, "Results/Destruction/H/"+std::to_string(i)+".txt");
-
         if(noTumorCells(Td, NODE_NUM))break;
     }
-    
+    Tdf = cell_counter(Td,NODE_NUM);
+    std::cout<<"Numero cel tumorales iniciales: "<<Tdi<<std::endl;
+    std::cout<<"Numero cel tumorales finales: "<<Tdf<<std::endl;
+    std::cout<<"Razon: "<<double(Tdi-Tdf)/double(Tdi)<<std::endl;
+
     delete [] Ed;
     delete [] Ecount;
     delete [] D;

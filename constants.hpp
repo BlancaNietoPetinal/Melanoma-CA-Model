@@ -5,14 +5,14 @@
 namespace constants {
   const int NNODES = 6;
   const int QUAD_NUM = 3;
-  const int NX = 25;
-  const int NY = 25;
-  const int GENERATION_IT = 140;
+  const int NX = 110;
+  const int NY = 110;
+  const int GENERATION_IT = 5;
   const int ELEMENT_NUM = ( NX - 1 ) * ( NY - 1 ) * 2;
   const int NODE_NUM = ( 2 * NX - 1 ) * ( 2 * NY - 1 );
-  const double L_N = 200;
+  const double L_N = 25; //200;
   const double L_M = 10;
-  const double COEF_DIFF = 0.95; //in assemble
+  const double COEF_DIFF = 1; //in assemble
   const double STARTING_NUTRIENTS = 0.4;
   const double ALPHA = 1.5;
   const double NEC = 0;//0.01;
@@ -21,11 +21,12 @@ namespace constants {
 
   // tumor lysis consts
   const int DESTRUCTION_IT = 10;
-  const double LYS = 0.2;
+  const double LYS = 0.3;
   const double REC = 1;
   const double INC = 0.5;
-  const int NEIGBOUR_NUMBER1 = 2; // for tumor destruction laws
-  const int NEIGBOUR_NUMBER3 = 2; // for tumor destruction laws
+  const int NEIGBOUR_NUMBER1 = 1; // for tumor destruction laws
+  const int NEIGBOUR_NUMBER3 = 1; // for tumor destruction laws
+  const double E_PERCENTAGE = 0.75; //percentaje of E cells, E = E_PER*T_CELLS
 
   const float A12 = 1.1*pow(10,-10);
   const float A21 = 4.8*pow(10,-10);
@@ -34,7 +35,7 @@ namespace constants {
   const float R2 = 1.8*pow(10,-1);
   const float K1 = 9.8*pow(10,8);
   const float K2 = pow(10,9);
-  const float DC = 20;//2.2;
+  const float DC = 2.2;
   const float D3 = 6.12*pow(10,-2);
   const float G = 0.15; //3.75*pow(10,-2);
   const float SIGMA = 0; //7.5*pow(10,4);

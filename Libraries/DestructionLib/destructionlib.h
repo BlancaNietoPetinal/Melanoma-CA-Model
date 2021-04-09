@@ -1,6 +1,9 @@
 #include <chrono>
 #include <iostream>
 #include <random>
+#include <time.h>
+#include <cmath>
+#include <ctime>
 #include <fstream> //getMat
 #include <cmath> //is_integer
 #include <vector> // neighbours
@@ -25,3 +28,4 @@ void inactivation(double T[], double E[], int Ecount[], double H[], int node, in
 void Emigration(double T[], double E[], int Ecount[], double H[], double D[], int node, int xsize, int ysize, std::mt19937 generator);
 int summation(double mat[], std::vector<int> neighbours);
 bool noTumorCells(double T[], int nnode);
+void random_place_cell(double * mat, int n_cells_to_place, int xsize, int ysize);

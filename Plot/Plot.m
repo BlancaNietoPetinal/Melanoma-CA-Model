@@ -1,8 +1,10 @@
-NX = 25;
-NY = 25;
-NFrames = 0;
+NX = 110;
+NY = 110;
+NFrames =   9;
 %showMultipleFrames(NFrames,NX,NY); 
+
 [T, N] = setFrame(NFrames, NX, NY);
+%sum(T(:));
 plotFrame(T, N)
 function showMultipleFrames(NFrames, NX, NY)
     figure(); % create a figure
@@ -33,19 +35,25 @@ function plotFrame(mat1, mat2)
 end
 
 function [mat1, mat2] = setFrame(frame, NX, NY)
-%     if frame<10
-%         framestr = strcat('00',int2str(frame));
-%     elseif frame<100
-%         framestr = strcat('0',int2str(frame));
-%     else
-%         framestr = int2str(frame);
-%     end
+    if frame<10
+        framestr = strcat('000',int2str(frame));
+    elseif frame<100
+        framestr = strcat('00',int2str(frame));
+    elseif frame<1000
+        framestr = strcat('0',int2str(frame));
+    else
+        framestr = int2str(frame);
+    end
     %DESTRUCTION
-    mat1 = load (strcat('../Results/Destruction/T/',int2str(frame),'.txt'));
-    mat2 = load (strcat('../Results/Destruction/E/',int2str(frame),'.txt'));
+    %mat1 = load (strcat('../Results/Destruction/T/',int2str(frame),'.txt'));
+    %mat2 = load (strcat('../Results/Destruction/E/',int2str(frame),'.txt'));
     %GENERATION
-    %mat1 = load (strcat('../Results/Generation/T/',framestr,'.txt'));
-    %mat2 = load (strcat('../Results/Generation/N/',framestr,'.txt'));
+    mat1 = load (strcat('../Results/Disconnected/T/0955.txt'));
+    mat2 = load (strcat('../Results/Papillary/N/0900.txt'));
+    %mat2 = load (strcat('../Results/Generation/N/001p.txt'));
+    %EXAMPLE
+    %mat1 = load (strcat('../Tests/Sample/Ttest_50x50_230.txt'));
+    %mat2 = load (strcat('../Tests/Sample/Ntest_50x50_230.txt'));
     
     mat1 = reshape(mat1,[(2*NX-1), (2*NY-1)]);
     mat2 = reshape(mat2,[(2*NX-1), (2*NY-1)]);
