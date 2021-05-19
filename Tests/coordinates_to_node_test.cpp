@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include "../DestructionLib/destructionlib.h"
+#include "../Libraries/DestructionLib/destructionlib.h"
 
 
 void test();

@@ -24,8 +24,8 @@ int main(){
 
     create_vec(NODE_NUM, Ecount, 0);
     create_vec(NODE_NUM, D, 0);
-    T = get_mat("Results/Filamentary/T/200.txt", NODE_NUM); 
-    H = get_mat("Results/Filamentary/H/200.txt", NODE_NUM); 
+    T = get_mat("Results/Generation/Disconnected/T/0350.txt", NODE_NUM); 
+    H = get_mat("Results/Generation/Disconnected/H/0350.txt", NODE_NUM); 
     
     //suggestion usar std::tuple para obtener los valores
     Td = int_2_double(T, NODE_NUM);
@@ -43,16 +43,19 @@ int main(){
             Hd[node] = Sol[1];
             Ed[node] = Sol[2];
         }
-        save_mat(NODE_NUM, Td, "Results/Destruction/T/"+std::to_string(i)+".txt");
-        save_mat(NODE_NUM, Ed, "Results/Destruction/E/"+std::to_string(i)+".txt");
-        save_mat(NODE_NUM, Ecount, "Results/Destruction/Ecount/"+std::to_string(i)+".txt");
-        save_mat(NODE_NUM, Hd, "Results/Destruction/H/"+std::to_string(i)+".txt");
+        std::cout<<"iteracion: "<<i<<std::endl;
+        // Tdf = cell_counter(Td,NODE_NUM);
+        // save_num2file(Tdf,"Results/DELETE/ODE_Lysis.txt");
+        save_mat(NODE_NUM, Td, "Results/Destruction/Disconnected/T/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Ed, "Results/Destruction/Disconnected/E/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Ecount, "Results/Destruction/Disconnected/Ecount/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Hd, "Results/Destruction/Disconnected/H/"+std::to_string(i)+".txt");
         if(noTumorCells(Td, NODE_NUM))break;
     }
-    Tdf = cell_counter(Td,NODE_NUM);
-    std::cout<<"Numero cel tumorales iniciales: "<<Tdi<<std::endl;
-    std::cout<<"Numero cel tumorales finales: "<<Tdf<<std::endl;
-    std::cout<<"Razon: "<<double(Tdi-Tdf)/double(Tdi)<<std::endl;
+    //Tdf = cell_counter(Td,NODE_NUM);
+    //std::cout<<"Numero cel tumorales iniciales: "<<Tdi<<std::endl;
+    //std::cout<<"Numero cel tumorales finales: "<<Tdf<<std::endl;
+    //std::cout<<"Razon: "<<double(Tdi-Tdf)/double(Tdi)<<std::endl;
 
     delete [] Ed;
     delete [] Ecount;

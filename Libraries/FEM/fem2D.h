@@ -52,7 +52,10 @@ void r8vec_print_some ( int n, double a[], int i_lo, int i_hi, std::string title
 double rhs ( double x, double y, double time, double N_old, 
 int T, int H, float lambda, double ALPHA );
 int s_len_trim ( std::string s );
-void solution_write ( int node_num, double u[], std::string u_file_name ) ;
+
 void timestamp ( );
 void xy_set ( int nx, int ny, int node_num, double xl, double xr, double yb,
   double yt, double node_xy[] );
+
+void solution_write ( int node_num, double u[], std::string u_file_name ) ;
+void solution_write ( int node_num, float u[], std::string u_file_name ) ;

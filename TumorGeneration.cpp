@@ -40,7 +40,7 @@ int node;
 bool node_label;
 int node_show;
 double node_xy[2*NODE_NUM];
-std::string folder = "Results/Generation/";
+std::string folder = "Results/DELETE/";
 std::string node_txt_file_name = folder + "rectangle_nodes.txt";
 std::string time_file_name = folder + "rectangle_time.txt";
 std::string triangulation_txt_file_name = folder + "rectangle_elements.txt";
@@ -112,7 +112,6 @@ int main ( void )
   // creamos matrices de nutrientes
   initial_nutrients ( NODE_NUM, node_xy, N_exact, NX, NY);
   initial_nutrients ( NODE_NUM, node_xy, M_exact, NX, NY);
-  solution_write(NODE_NUM, N, "N/initial_nut");
   for ( node = 0; node < NODE_NUM; node++ )
   {
     N[node] = N_exact[node];
@@ -129,8 +128,8 @@ int main ( void )
   create_vec(NODE_NUM, D, 0);
 
   // posicionamos una celula T
-  //T[int((2*NX -1)*(2*NY - 1)/2)] = 1;
-  //H[int((2*NX -1)*(2*NY - 1)/2)] = 0;
+  T[int((2*NX -1)*(2*NY - 1)/2)] = 1;
+  H[int((2*NX -1)*(2*NY - 1)/2)] = 0;
 
   solution_write ( NODE_NUM, N, N_nutrients_name );
   solution_write ( NODE_NUM, M, M_nutrients_name );
@@ -178,8 +177,9 @@ int main ( void )
     M = dgb_sl ( NODE_NUM, ib, ib, a_M, pivot_M, f_M, 0 );
 
     // El tumor evoluciona
+    std::cout<<"ITERACION: "<<time_step<<std::endl;
     grow(M, N, T, D, H, 2*NX-1, 2*NY-1);
-    
+
     //  Incremento del filename y guardar la solucion
     time_unit << std::setw(14) << time << "\n"; //se puede quitar??
     filename_inc ( &N_nutrients_name );
@@ -187,16 +187,16 @@ int main ( void )
     filename_inc ( &T_filename );
     filename_inc ( &D_filename );
     filename_inc ( &H_filename );
-  
-    if(time_step%1==0){
+
+    if(time_step%5==0){
       solution_write(NODE_NUM, N, N_nutrients_name);
-      solution_write(NODE_NUM, M, M_nutrients_name);
+      //solution_write(NODE_NUM, M, M_nutrients_name);
       save_mat(NODE_NUM, T, T_filename);
-      save_mat(NODE_NUM, H, H_filename);
-      save_mat(NODE_NUM, D, D_filename);
+      //save_mat(NODE_NUM, H, H_filename);
+      //save_mat(NODE_NUM, D, D_filename);
     }
   
-    if(is_tumor_in_border(T,2*NX - 1,2*NY - 1)){
+    if(metastasis(T, 2*NX - 1, 2*NY - 1)){
       break;
     }
   }

@@ -16,12 +16,16 @@ void limits(double *mat, int node, int d, int &xmin, int &ymin, int &xmax, int &
 std::vector<int> get_specific_neighbours(int *mat, int node, int d, int value, char mode, int xsize, int ysize);
 std::vector<int> get_specific_neighbours(double *mat, int node, int d, int value, char mode,  int xsize, int ysize);
 void create_vec(int node_num, int mat[], int value);
+void create_vec(int node_num, float mat[], float value);
 void save_mat(int node_num, int mat[], std::string filename);
 void save_mat(int node_num, float mat[], std::string filename);
 void save_mat(int node_num, double mat[], std::string filename);
 int* get_random_nodes(int xsize, int ysize);
-bool is_tumor_in_border(int *mat, int xsize, int ysize);
+bool metastasis(int *mat, int xsize, int ysize);
 void changeNegativeValue(double &value);
 double* int_2_double(int mat[], int matlen);
-int cell_counter(int mat[], int node_num);
-int cell_counter(double mat[], int node_num);
+int cell_counter(int mat[], int matlen);
+int cell_counter(double mat[], int matlen);
+void save_num2file(float num, std::string filename);
+void get_occupied_nodes(int mat[], int mat_nodes[]);
+

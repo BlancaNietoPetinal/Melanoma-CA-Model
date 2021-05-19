@@ -1,16 +1,15 @@
-//#include <iostream>
-//#include <fstream> //getMat
 #include "toolslib.h"
 #include <random>
 #include <chrono>
 #include <array>
+#include <iostream>
 #include <algorithm>
 
 int * get_mat(std::string filename, int matlen){
     int * mat;
+    int loop = 0;
     mat = new int[matlen];
     std::ifstream file;
-    int loop = 0;
     file.open(filename);
     if(file.is_open()){
         while(file >> mat[loop]){
@@ -25,9 +24,9 @@ int * get_mat(std::string filename, int matlen){
 };
 void node_to_coordinates(int node, int &x, int &y, int xsize, int ysize){
     int n = 0;
-    bool esc = 0;
+    bool esc = false;
     if(node>=(xsize*ysize)){
-        std::cout<<"La matriw es demasiado pequena para albergar ese nodo.";
+        std::cout<<"La matriz es demasiado pequena para albergar ese nodo.";
     }
     for(int xcoor = 0; xcoor<xsize; xcoor++){
         for(int ycoor = 0; ycoor<ysize; ycoor++){
@@ -46,12 +45,16 @@ void node_to_coordinates(int node, int &x, int &y, int xsize, int ysize){
 };
 void coordinates_to_node(int &node, int x, int y, int xsize, int ysize){
     int n=0;
-    bool esc = 0;
+    bool esc = false;
+    if( (x>xsize) || (y>ysize) ){
+        std::cout<<"Las coordenadas estan fuera de la matriz"<<std::endl;
+        esc = true;
+    }
     for(int xcoord = 0; xcoord<xsize; xcoord++){
         for(int ycoord = 0; ycoord<ysize; ycoord++){
             if( (xcoord==x) && (ycoord==y) ){
                 node = n;
-                esc = 1;
+                esc = true;
                 break;
             }
             n++;
@@ -195,6 +198,13 @@ void create_vec(int node_num, int mat[], int value){ //poner un mensaje si node_
         mat[i] = value;
     }
 }
+
+void create_vec(int node_num, float mat[], float value){
+    for (int i = 0; i<node_num; i++) 
+    {
+        mat[i] = value;
+    }
+};
 void save_mat(int node_num, int mat[], std::string filename){
     std::ofstream File(filename); 
     for(int node = 0; node<node_num; node++){
@@ -216,6 +226,7 @@ void save_mat(int node_num, double mat[], std::string filename){
     }
     File.close();
 }
+
 void changeNegativeValue(double &value){
     if(value<0){
         value = 0;
@@ -232,18 +243,26 @@ int* get_random_nodes(int xsize, int ysize){
     std::random_shuffle(&random_nodes[0], &random_nodes[xsize*ysize]);
     return random_nodes;
 }
-bool is_tumor_in_border(int *mat, int xsize, int ysize){ //cambiar nombre
-    bool result=false;
+bool metastasis(int *mat, int xsize, int ysize){ //cambiar nombre
+    bool result=false, loop = true;
     int node = 0;
-    for(int x = 0; x<xsize; x++){
-        for(int y = 0; y<ysize; y++){
-            if( (x==0) || (y==0) || (x==(xsize-1)) || (y==(ysize-1))){
-                if(mat[node] != 0){
+    while(loop){
+        for(int x = 0; x<xsize; x++){
+            for(int y = 0; y<ysize; y++){
+                if(mat[node]>=MAX_PILED_CELL){
                     result = true;
+                    loop = false;
                 }
+                if( (x==0) || (y==0) || (x==(xsize-1)) || (y==(ysize-1))){
+                    if(mat[node] != 0){
+                        result = true;
+                        loop = false;
+                    }
+                }
+                node++;
             }
-            node++;
         }
+        loop = false;
     }
     return result;
 };
@@ -256,18 +275,39 @@ double* int_2_double(int mat[], int matlen){
     return matd;
 };
 
-int cell_counter(int mat[], int node_num){
+int cell_counter(int mat[], int matlen){
     int n_cells = 0;
-    for(int node = 0;node<node_num; node++){
+    for(int node = 0;node<matlen; node++){
+        n_cells = n_cells + mat[node];
+    };
+    return n_cells;
+};
+int cell_counter(double mat[], int matlen){
+    int n_cells = 0;
+    for(int node = 0;node<matlen; node++){
         n_cells = n_cells + mat[node];
     };
     return n_cells;
 };
 
-int cell_counter(double mat[], int node_num){
-    int n_cells = 0;
-    for(int node = 0;node<node_num; node++){
-        n_cells = n_cells + mat[node];
-    };
-    return n_cells;
+void save_num2file(float num, std::string filename){
+    std::ofstream file;
+    file.open ("example.txt");
+    if(file.is_open()){
+        file << std::to_string(num)<< std::endl;
+        file.close();
+    }
+    else{
+        std::cout<<"No se pudo abrir el fichero.";
+    }
+};
+
+void get_occupied_nodes(int mat[], int mat_nodes[]){
+    int i=0;
+    for(int node = 0; node<NODE_NUM; node++){
+        if(mat[node]>0){
+            mat_nodes[i] = node;
+            i++;
+        }
+    }
 };

@@ -7,17 +7,18 @@
             "args": [
                 "-g",
 
-                //"TumorGeneration.cpp",
-                //"Libraries/GeneratorLib/generatorlib.cpp",
-                //"Libraries/FEM/fem2D.cpp",
+                "TumorGeneration.cpp",
+                "Libraries/GeneratorLib/generatorlib.cpp",
+                "Libraries/FEM/fem2D.cpp",
 
-                "TumorDestruction.cpp",
-                "Libraries/DestructionLib/destructionlib.cpp",
-                "Libraries/RK4/rk4lib.cpp",
+                //"TumorDestruction.cpp",
+                //"Libraries/DestructionLib/destructionlib.cpp",
+                //"Libraries/RK4/rk4lib.cpp",
 
                 "Libraries/Tools/toolslib.cpp",
-                //"Original/original.cpp",
                 
+                //"Original/original.cpp",
+                //"Tests/EigenTests/GaussianMultivar.cpp",
                 //"Tests/evolve/evolve_test.cpp",
                 //"Tests/fem/fem_test.cpp",
                 //"Tests/getMat/getMat_test.cpp",
@@ -41,10 +42,16 @@
                 //"Tests/cell_counter.cpp",
                 //"Tests/effectorCellPlacement1.cpp",
                 //"Tests/DELETE.cpp",
+                //"Libraries/EigenLib/test/mpl2only.cpp",
                 
                 //"${file}",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-I",
+                "C:\\Users\\Lenovo\\Documents\\Universidades\\URJC\\Cuarto\\OneDrive - Universidad Rey Juan Carlos\\TFG\\Main\\Libraries\\EigenLib",
+                //"-Wall",
+                //"-I",
+                //"C:\\Users\\Lenovo\\Documents\\Universidades\\URJC\\Cuarto\\OneDrive - Universidad Rey Juan Carlos\\TFG\\Main\\Libraries\\gsl"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

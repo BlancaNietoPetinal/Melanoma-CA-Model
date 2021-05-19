@@ -1104,7 +1104,10 @@ void initial_nutrients ( int node_num, double node_xy[], double u[], int nx, int
 //
 {
   int node;
-
+  int var;
+  //std::seed_seq seed{static_cast<long long>(std::chrono::high_resolution_clock::now().time_since_epoch().count()),
+                    //static_cast<long long>(reinterpret_cast<intptr_t>(&var))};
+  //std::mt19937 generator(seed);
   node = 0;
   for ( int j = 1; j <= 2 * ny - 1; j++ )
   {
@@ -1121,6 +1124,7 @@ void initial_nutrients ( int node_num, double node_xy[], double u[], int nx, int
       node = node + 1;
     }
   }
+
   return;
 }
 

@@ -5,29 +5,40 @@
 namespace constants {
   const int NNODES = 6;
   const int QUAD_NUM = 3;
-  const int NX = 110;
-  const int NY = 110;
-  const int GENERATION_IT = 5;
+  const int NX =  50;
+  const int NY = 50;
+  const int GENERATION_IT = 20000;
   const int ELEMENT_NUM = ( NX - 1 ) * ( NY - 1 ) * 2;
   const int NODE_NUM = ( 2 * NX - 1 ) * ( 2 * NY - 1 );
-  const double L_N = 25; //200;
+  const double L_N = 150; //200;
   const double L_M = 10;
-  const double COEF_DIFF = 1; //in assemble
-  const double STARTING_NUTRIENTS = 0.4;
-  const double ALPHA = 1.5;
+  const double COEF_DIFF = 10; //in assemble
+  const double STARTING_NUTRIENTS = 2;
+  const double ALPHA = 0.7;
   const double NEC = 0;//0.01;
-  const double MIG = 10000;
-  const double DIV = 0.3;
+  const double MIG = 0.02; //0.02
+  const double DIV = 0.5; //0.1
+
+  // Modelizacion de melanomas
+  const int STAIN_NUM = 3;
+  const float S_xx = 20;
+  const float S_yy = 20;
+  const float Rho = 0.1;
+  //const float M_x = 40;
+  //const float M_y = 55;
+  const double MAX_PILED_CELL = 50;
 
   // tumor lysis consts
   const int DESTRUCTION_IT = 10;
-  const double LYS = 0.3;
+  const double LYS = 0.4;
   const double REC = 1;
   const double INC = 0.5;
   const int NEIGBOUR_NUMBER1 = 1; // for tumor destruction laws
   const int NEIGBOUR_NUMBER3 = 1; // for tumor destruction laws
   const double E_PERCENTAGE = 0.75; //percentaje of E cells, E = E_PER*T_CELLS
+  const int STAIN_COORD[STAIN_NUM][2] = {{50,65},{50,40},{40,50}};
 
+  
   const float A12 = 1.1*pow(10,-10);
   const float A21 = 4.8*pow(10,-10);
   const float A31 = 2.8*pow(10,-9);
@@ -42,5 +53,6 @@ namespace constants {
   const float HC = 2.02*pow(10,7);
   const float L = 0.87; //1.2*pow(10,-1);
   const float S = 0.15; //1.6;
+  
 }
 #endif

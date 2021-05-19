@@ -6,21 +6,11 @@
 double K(double E, double T){
     int result;
     result = (DC*pow(E,L))/((S*pow(T,L))+pow(E,L));
-    //std::cout<<"E: "<<std::endl;
     if( isnan(result) || ((E==0) & (T==0)) ){
         result=0;
     }
-    //if(result!=0){
-    //    std::cout<<"K: "<<result<<std::endl;
-    //    std::cout<<"S*pow(T,L): "<<S*pow(T,L)<<std::endl;
-    //    std::cout<<"denominador: "<<(S*pow(T,L))+pow(E,L)<<std::endl;
-    //}
     return result;
 }
-
-//double  K(double *E, double *T){
-//    return DC*pow(*E,L)/((S*pow(*T,L))+pow(*E,L));
-//}
 
 double dTdt(double t, double T,double H,double E){
     double result = (R1*T*(1 - (T/K1))) - (A12*T*H) - ((DC*pow((E/T),L)/(S+pow((E/T),L)))*T);
