@@ -185,7 +185,8 @@ int main ( void )
     // El tumor evoluciona
     std::cout<<"ITERACION: "<<time_step<<std::endl;
     grow(M, N, T, D, H, DIV_mat, 2*NX-1, 2*NY-1);
-    
+    //T[1740] = 40;
+    //T[1739] = 30;
     //  Incremento del filename y guardar la solucion
     time_unit << std::setw(14) << time << "\n"; //se puede quitar??
     filename_inc ( &N_nutrients_name );

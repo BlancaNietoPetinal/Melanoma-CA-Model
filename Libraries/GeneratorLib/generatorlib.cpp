@@ -111,7 +111,7 @@ void mutation(int T[], float DIV_mat[]){ //ANADIR DECRECIMIENTO??
                 std::chrono::high_resolution_clock::now().time_since_epoch()),
                         static_cast<long long>(reinterpret_cast<intptr_t>(&var)))};
     std::knuth_b generator(seed);
-    std::uniform_int_distribution<int> dice_distribution(1,3);
+    std::uniform_int_distribution<int> dice_distribution(1,int(NX/10)); //CAMBIAR EL 3??
     int rnd = dice_distribution(generator);
     std::normal_distribution<float> distribution(DIV,0.2);
 
@@ -125,7 +125,6 @@ void mutation(int T[], float DIV_mat[]){ //ANADIR DECRECIMIENTO??
         mutated++;
     }
 };
-
 
 void division(double N[], int T[], int D[], int H[], float DIV_mat[], int node, int xsize, int ysize, std::mt19937 generator){
     std::normal_distribution<double> distribution(0,1);

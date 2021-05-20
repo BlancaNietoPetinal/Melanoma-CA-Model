@@ -46,6 +46,7 @@ int main(){
             Hd[node] = Sol[1];
             Ed[node] = Sol[2];
         }
+
         std::cout<<"ITERACION: "<<i<<std::endl;
         save_mat(NODE_NUM, Td, "Results/Destruction/Spherical/T/"+std::to_string(i)+".txt");
         save_mat(NODE_NUM, Ed, "Results/Destruction/Spherical/E/"+std::to_string(i)+".txt");

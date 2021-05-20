@@ -28,6 +28,11 @@ void node_to_coordinates(int node, int &x, int &y, int xsize, int ysize){
     if(node>=(xsize*ysize)){
         std::cout<<"La matriz es demasiado pequena para albergar ese nodo.";
     }
+
+    int yd,xd;
+
+    yd = int(node/59); //(node % 60);
+    xd = node - yd*(59);
     for(int xcoor = 0; xcoor<xsize; xcoor++){
         for(int ycoor = 0; ycoor<ysize; ycoor++){
             if(n == node){
@@ -42,28 +47,13 @@ void node_to_coordinates(int node, int &x, int &y, int xsize, int ysize){
             break;
         }
     }
+    
 };
+
 void coordinates_to_node(int &node, int x, int y, int xsize, int ysize){
-    int n=0;
-    bool esc = false;
-    if( (x>xsize) || (y>ysize) ){
-        std::cout<<"Las coordenadas estan fuera de la matriz"<<std::endl;
-        esc = true;
-    }
-    for(int xcoord = 0; xcoord<xsize; xcoord++){
-        for(int ycoord = 0; ycoord<ysize; ycoord++){
-            if( (xcoord==x) && (ycoord==y) ){
-                node = n;
-                esc = true;
-                break;
-            }
-            n++;
-        }
-        if(esc){
-            break;
-        }
-    }
+    node = ((2*NX-1)-1)*y+(y+x);
 }
+
 std::vector<int> get_neighbours(int *mat, int node, int d, int xsize, int ysize){ //devolver puntero??
     // devuelve los n vecinos
     std::vector<int> neighbour_nodes;
