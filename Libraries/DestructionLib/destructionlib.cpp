@@ -1,15 +1,15 @@
 #include "destructionlib.h"
-//#include "../Tools/toolslib.h"
-#include <array>
 
 
+/*
 void get_tumor_limits(double * mat, int xsize, int ysize, int &left, int &right, int &sup, int &inf){
     left = leftBorder(mat, xsize*ysize);
     right = rightBorder(mat, xsize*ysize);
     sup = superiorBorder(mat, xsize, ysize);
     inf = inferiorBorder(mat, xsize, ysize);
 }
-
+*/
+/*
 int leftBorder(double * mat, int size){
     int node = 0;
     while(mat[node]==0){
@@ -17,6 +17,8 @@ int leftBorder(double * mat, int size){
     }
     return node;
 };
+*/
+/*
 int rightBorder(double * mat, int size){
     int lastNode;
     for(int node = 0; node<size ; node++){
@@ -26,6 +28,8 @@ int rightBorder(double * mat, int size){
     }
     return lastNode;
 };
+*/
+/*
 int superiorBorder(double * mat, int xsize, int ysize){
     int xcoordinate=0, ycoordinate=ysize, aux, node = 0, y,result;
     for(int x = 0; x<xsize; x++){
@@ -45,6 +49,8 @@ int superiorBorder(double * mat, int xsize, int ysize){
     }
     return result;
 };
+*/
+/*
 int inferiorBorder(double * mat, int xsize, int ysize){
     int xcoordinate=0, ycoordinate=0, aux, node = 0, y,result;
     for(int x = 0; x<xsize; x++){
@@ -64,10 +70,13 @@ int inferiorBorder(double * mat, int xsize, int ysize){
     }
     return result;
 }
-double * effectorCellPlacement(int leftnode, int rightnode, int supnode, int infnode, int xsize, int ysize, double *T){
+*/
+/*
+double * effectorCellPlacement(int xsize, int ysize, double *T){
     double * rectangle;
-    int xleft, xright, ysup, yinf, _, n_cells;
+    int xleft, xright, ysup, yinf, _, n_cells, leftnode, rightnode, supnode, infnode;
     rectangle = new double[xsize*ysize];
+    get_tumor_limits(T, xsize, ysize, leftnode, rightnode, supnode, infnode);
 
     node_to_coordinates(leftnode, xleft, _, xsize, ysize);
     node_to_coordinates(rightnode, xright, _, xsize, ysize);
@@ -75,12 +84,15 @@ double * effectorCellPlacement(int leftnode, int rightnode, int supnode, int inf
     node_to_coordinates(infnode, _, yinf, xsize, ysize);
     rectangle = get_squeare(xleft, xright, ysup, yinf, xsize, ysize);
     match_matrices(T, rectangle, xsize, ysize);
+
     n_cells = int(E_PERCENTAGE*cell_counter(rectangle, xsize*ysize));
     // Ahora que tenemos el rectangulo, vamos a crear una funcion
     // para colocar cada celula de forma aleatoria dentro del rectangulo
     random_place_cell(rectangle, n_cells, xsize, ysize);
     return rectangle;
 };
+*/
+/*
 double * get_squeare(int xleft, int xright, int ysup, int yinf, int xsize, int ysize){
     int node = 0;
     double * mat;
@@ -98,6 +110,8 @@ double * get_squeare(int xleft, int xright, int ysup, int yinf, int xsize, int y
     }
     return mat;
 };
+*/
+/*
 void match_matrices(double *T,double *mat, int xsize, int ysize){
     int totalsize = xsize*ysize;
     for(int node = 0; node<totalsize; node++){
@@ -106,7 +120,7 @@ void match_matrices(double *T,double *mat, int xsize, int ysize){
         }
     }
 };
-
+*/
 void tumor_lysis(double T[], double E[], int Ecount[], double D[], double H[], int xsize, int ysize){
     int var;
     std::seed_seq seed{static_cast<long long>(std::chrono::high_resolution_clock::now().time_since_epoch().count()),
@@ -122,7 +136,6 @@ void tumor_lysis(double T[], double E[], int Ecount[], double D[], double H[], i
             //if(E[node]==1){
             if(E[node]>=0){
                 Tneighbours = get_specific_neighbours(T, node, 1, 0,'>', xsize, ysize);
-                //std::cout<<"Node: "<<node<<"Tnei size: "<<Tneighbours.size()<<std::endl;
                 if(Tneighbours.size()!=0){
                     lysis(T, E, Ecount, D, H, node, xsize, ysize, generator);
                 }
@@ -262,17 +275,104 @@ void random_place_cell(double * mat, int n_cells_to_place, int xsize, int ysize)
     int var;
     int n, node;
     n = cell_counter(mat,xsize*ysize) - n_cells_to_place;
-    std::cout<<"n: "<<n<<std::endl;
     std::seed_seq seed{static_cast<long long>(std::chrono::high_resolution_clock::now().time_since_epoch().count()),
                         static_cast<long long>(reinterpret_cast<intptr_t>(&var))};
     std::mt19937 generator(seed);
     while(n>0){
         std::uniform_int_distribution<int> dice_distribution(0,xsize*ysize);
         node = dice_distribution(generator);
-        //std::cout<<"Node: "<<node<<std::endl;
         if(mat[node]==1){
             mat[node]=0;
             n--;
         }
     }
 }
+
+void effectorCellPlacement(int xsize, int ysize, double T[], double E[]){
+    std::vector<int> Tneighbours;
+    int ECells, i = 1;
+    ECells = E_PERCENTAGE*cell_counter(T, xsize*ysize);
+    sector(E, 3);
+    while(ECells > 0){
+        int allocated = 0;
+        for(int node = 0; node<NODE_NUM; node++){
+            if( (T[node]==0) & (E[node] == -1)){
+                Tneighbours = get_specific_neighbours(T, node, i, 0, '>', xsize, ysize);
+                if((!Tneighbours.empty()) ){
+                    E[node] = 1;
+                    ECells--;
+                    allocated++;
+                }
+            }
+        }
+        i++;
+        if(allocated == 0){
+            ECells = 0;
+        };
+    }
+    for(int node = 0; node<NODE_NUM; node++){
+        if(E[node]==-1){
+            E[node] = 0;
+        }
+    }
+    //random_place_cell
+}
+
+
+void sector(double E[], int quadrant){
+    switch (quadrant)
+    {
+    case 1:
+        first_quad(E);
+        break;
+    case 2:
+        second_quad(E);
+        break;
+    case 3:
+        third_quad(E);
+        break;
+    case 4:
+        fourth_quad(E);
+        break;
+    }
+};
+
+void first_quad(double E[]){
+    int node;
+    for(int x = (2*NX-1)/2; x<(2*NX-1);x++){
+        for(int y = 0; y<(2*NY-1)/2; y++){
+            coordinates_to_node(node, x, y, 2*NX-1, 2*NY-1 );
+            E[node] = -1;
+        }
+    }
+};
+
+void second_quad(double E[]){
+    int node;
+    for(int x = 0; x<(2*NX-1)/2;x++){
+        for(int y = 0; y<(2*NY-1)/2; y++){
+            coordinates_to_node(node, x, y, 2*NX-1, 2*NY-1 );
+            E[node] = 3;
+        }
+    }
+};
+
+void third_quad(double E[]){
+    int node;
+    for(int x = 0; x<(2*NX-1)/2;x++){
+        for(int y = (2*NY-1)/2; y<(2*NY-1); y++){
+            coordinates_to_node(node, x, y, 2*NX-1, 2*NY-1 );
+            E[node] = 3;
+        }
+    }
+};
+
+void fourth_quad(double E[]){
+    int node;
+    for(int x = (2*NX-1)/2; x<(2*NX-1);x++){
+        for(int y = (2*NY-1)/2; y<(2*NY-1); y++){
+            coordinates_to_node(node, x, y, 2*NX-1, 2*NY-1 );
+            E[node] = 3;
+        }
+    }
+};

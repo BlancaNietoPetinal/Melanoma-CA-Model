@@ -17,6 +17,7 @@ std::vector<int> get_specific_neighbours(int *mat, int node, int d, int value, c
 std::vector<int> get_specific_neighbours(double *mat, int node, int d, int value, char mode,  int xsize, int ysize);
 void create_vec(int node_num, int mat[], int value);
 void create_vec(int node_num, float mat[], float value);
+void create_vec(int node_num, double mat[], double value);
 void save_mat(int node_num, int mat[], std::string filename);
 void save_mat(int node_num, float mat[], std::string filename);
 void save_mat(int node_num, double mat[], std::string filename);

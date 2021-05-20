@@ -205,6 +205,13 @@ void create_vec(int node_num, float mat[], float value){
         mat[i] = value;
     }
 };
+void create_vec(int node_num, double mat[], double value){
+    for (int i = 0; i<node_num; i++) 
+    {
+        mat[i] = value;
+    }
+};
+
 void save_mat(int node_num, int mat[], std::string filename){
     std::ofstream File(filename); 
     for(int node = 0; node<node_num; node++){

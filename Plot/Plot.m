@@ -49,9 +49,9 @@ function [mat1, mat2] = setFrame(frame, NX, NY)
         framestr = int2str(frame);
     end
     %DESTRUCTION
-    mat1 = load (strcat('../Results/DELETE/T/650.txt'));
-    %mat2 = load (strcat('../Results/DELETE/N/400.txt'));
-    mat2 = load (strcat('../Results/DELETE/DIV.txt'));
+    mat1 = load (strcat('../Results/DELETE/T/405.txt'));
+    mat2 = load (strcat('../Results/Destruction/Disconnected/E/initial.txt'));
+    %mat2 = load (strcat('../Results/DELETE/DIV/440.txt'));
     %GENERATION
 %     mat1 = load (strcat('../Results/Generation/Disconnected/T/0350.txt'));
 %     mat2 = load (strcat('../Results/Generation/Disconnected/N/0350.txt'));

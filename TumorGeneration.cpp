@@ -28,6 +28,7 @@ int *pivot_M;
 int *T;
 int *D;
 int *H;
+float *DIV_mat;
 double eh1;
 double el2;
 double element_area[ELEMENT_NUM];
@@ -45,6 +46,7 @@ std::string node_txt_file_name = folder + "rectangle_nodes.txt";
 std::string time_file_name = folder + "rectangle_time.txt";
 std::string triangulation_txt_file_name = folder + "rectangle_elements.txt";
 std::string N_nutrients_name = folder + "N/000.txt";
+std::string DIV_filename = folder + "DIV/000.txt";
 std::string M_nutrients_name = folder + "M/000.txt";
 std::string T_filename = folder + "T/000.txt";
 std::string D_filename = folder + "D/000.txt";
@@ -68,7 +70,7 @@ int main ( void )
   int time_step_num;
   double time_step_size;
   std::ofstream time_unit;
-
+  
   timestamp ( );
 
   // coordenadas de los nodos
@@ -106,9 +108,12 @@ int main ( void )
   T = new int[NODE_NUM];
   D = new int[NODE_NUM];
   H = new int[NODE_NUM];
+  DIV_mat = new float[NODE_NUM];
+
 
   time = time_init;
-
+  //stain_generator();
+  //save_theta_DIV();
   // creamos matrices de nutrientes
   initial_nutrients ( NODE_NUM, node_xy, N_exact, NX, NY);
   initial_nutrients ( NODE_NUM, node_xy, M_exact, NX, NY);
@@ -123,6 +128,7 @@ int main ( void )
   time_unit << "  " << std::setw(14) << time << "\n"; //se puede quitar?
 
   // creamos T H y D
+  create_vec(NODE_NUM, DIV_mat, DIV);
   create_vec(NODE_NUM, T, 0);
   create_vec(NODE_NUM, H, 1);
   create_vec(NODE_NUM, D, 0);
@@ -178,21 +184,23 @@ int main ( void )
 
     // El tumor evoluciona
     std::cout<<"ITERACION: "<<time_step<<std::endl;
-    grow(M, N, T, D, H, 2*NX-1, 2*NY-1);
-
+    grow(M, N, T, D, H, DIV_mat, 2*NX-1, 2*NY-1);
+    
     //  Incremento del filename y guardar la solucion
     time_unit << std::setw(14) << time << "\n"; //se puede quitar??
     filename_inc ( &N_nutrients_name );
     filename_inc ( &M_nutrients_name );
+    filename_inc ( &DIV_filename );
     filename_inc ( &T_filename );
     filename_inc ( &D_filename );
     filename_inc ( &H_filename );
 
     if(time_step%5==0){
       solution_write(NODE_NUM, N, N_nutrients_name);
+      save_mat(NODE_NUM, DIV_mat, DIV_filename);
       //solution_write(NODE_NUM, M, M_nutrients_name);
       save_mat(NODE_NUM, T, T_filename);
-      //save_mat(NODE_NUM, H, H_filename);
+      save_mat(NODE_NUM, H, H_filename);
       //save_mat(NODE_NUM, D, D_filename);
     }
   
