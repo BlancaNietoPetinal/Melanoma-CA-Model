@@ -7,7 +7,7 @@
 # include "constants.hpp"
 using namespace constants;
 
-int *T, *Ecount, *D, *H; //leftLimitCell, rightLimitCell, superiorLimitCell, inferiorLimitCell;
+int *T, *Ecount, *D, *H, *T_cells; 
 double *Td, *Hd, *Ed, *Dd, *Sol, r;
 int xsize = 2*NX-1, ysize = 2*NY-1, Tdi, Tdf;
 int main(){
@@ -21,6 +21,7 @@ int main(){
     Ed = new double[NODE_NUM];
     Dd = new double[NODE_NUM];
     Sol = new double[NODE_NUM];
+    T_cells = new int[DESTRUCTION_IT];
 
     create_vec(NODE_NUM, Ecount, 0);
     create_vec(NODE_NUM, Ed, 0);
@@ -31,8 +32,6 @@ int main(){
     //suggestion usar std::tuple para obtener los valores
     Td = int_2_double(T, NODE_NUM);
     Hd = int_2_double(H, NODE_NUM);
-    Tdi = cell_counter(Td,NODE_NUM); //QUITAR
-    //Ed = effectorCellPlacement(2*NX-1, 2*NY-1, Td);
 
     effectorCellPlacement(2*NX-1, 2*NY-1, Td, Ed);
     save_mat(NODE_NUM, Ed, "Results/Destruction/Disconnected/E/initial.txt");
@@ -46,11 +45,13 @@ int main(){
         }
         std::cout<<"ITERACION: "<<i<<std::endl;
         save_mat(NODE_NUM, Td, "Results/Destruction/Disconnected/T/"+std::to_string(i)+".txt");
-        //save_mat(NODE_NUM, Ed, "Results/Destruction/Disconnected/E/"+std::to_string(i)+".txt");
-        save_mat(NODE_NUM, Ecount, "Results/Destruction/Disconnected/Ecount/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Ed, "Results/Destruction/Disconnected/E/"+std::to_string(i)+".txt");
+        //save_mat(NODE_NUM, Ecount, "Results/Destruction/Disconnected/Ecount/"+std::to_string(i)+".txt");
         save_mat(NODE_NUM, Hd, "Results/Destruction/Disconnected/H/"+std::to_string(i)+".txt");
-        if(noTumorCells(Td, NODE_NUM))break;
+        T_cells[i] = cell_counter(Td, NODE_NUM);
+        if( (no_cells(Td, NODE_NUM)) || (no_cells(Ed, NODE_NUM)) )break;
     }
+    save_mat(DESTRUCTION_IT, T_cells, "Results/Destruction/Disconnected/T/cell_count.txt");
 
     delete [] Ed;
     delete [] Ecount;

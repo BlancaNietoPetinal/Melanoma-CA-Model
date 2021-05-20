@@ -28,7 +28,7 @@ void recruitment(double T[], double E[], double D[], double H[], int node, int x
 void inactivation(double T[], double E[], int Ecount[], double H[], int node, int xsize, int ysize, std::mt19937 generator);
 void Emigration(double T[], double E[], int Ecount[], double H[], double D[], int node, int xsize, int ysize, std::mt19937 generator);
 int summation(double mat[], std::vector<int> neighbours);
-bool noTumorCells(double T[], int nnode);
+bool no_cells(double mat[], int nnode);
 void random_place_cell(double * mat, int n_cells_to_place, int xsize, int ysize);
 void effectorCellPlacement(int xsize, int ysize, double T[], double E[]);
 void sector(double E[], int quadrant);

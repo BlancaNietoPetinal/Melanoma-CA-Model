@@ -25,12 +25,12 @@ namespace constants {
 
   // tumor lysis consts
   const int DESTRUCTION_IT = 10;
-  const double LYS = 0.4;
-  const double REC = 1;
-  const double INC = 0.5;
+  const double LYS = 0.2;
+  const double REC = 0.9;
+  const double INC = 0.1;
   const int NEIGBOUR_NUMBER1 = 1; // for tumor destruction laws
   const int NEIGBOUR_NUMBER3 = 1; // for tumor destruction laws
-  const double E_PERCENTAGE = 0.5; //percentaje of E cells, E = E_PER*T_CELLS
+  const double E_PERCENTAGE = 0.5; //percentage of E cells, E = E_PER*T_CELLS
 
   
   const float A12 = 1.1*pow(10,-10);

@@ -192,8 +192,7 @@ void recruitment(double T[], double E[], double D[], double H[], int node, int x
     double rnd_n = distribution(generator), P;
     
     Tneighbours = get_specific_neighbours(T, node, NEIGBOUR_NUMBER1, 0, '>', xsize, ysize);
-    P = exp(-pow(1/(summation(T, Tneighbours)*REC),2));
-    //Hneighbours = get_specific_neighbours(H, node, 1, 1, '=', xsize, ysize);
+    P = exp(-1/pow((summation(T, Tneighbours)*REC),2));
     Hneighbours = get_specific_neighbours(H, node, 1, 0, '>', xsize, ysize);
     if(P>fabs(rnd_n) && (Hneighbours.size()>0)){
         index = u_distrib(generator) % Hneighbours.size();
@@ -212,6 +211,7 @@ void inactivation(double T[], double E[], int Ecount[], double H[], int node, in
         H[node] = 1;
     }
 };
+//REVISAR RECRUITMENT
 int summation(double mat[], std::vector<int> neighbours){
     int node, result = 0;
     for(int i; i<neighbours.size(); i++){
@@ -228,7 +228,7 @@ void Emigration(double T[], double E[], int Ecount[], double H[], double D[], in
     index = u_distrib(generator) % neighbours.size();
     neignode = neighbours[index];
     /*if(E[neignode] == 1){
-                temp = Ecount[neignode];
+        temp = Ecount[neignode];
         Ecount[neignode] = Ecount[node];
         Ecount[node] = temp;
 
@@ -260,10 +260,10 @@ void Emigration(double T[], double E[], int Ecount[], double H[], double D[], in
     }
 };
 
-bool noTumorCells(double T[], int nnode){
+bool no_cells(double mat[], int nnode){
     bool result = true;
     for(int node=0; node<nnode; node++){
-        if(T[node]!=0){
+        if(mat[node]!=0){
             result = false;
             break;
         }
@@ -292,7 +292,7 @@ void effectorCellPlacement(int xsize, int ysize, double T[], double E[]){
     std::vector<int> Tneighbours;
     int ECells, i = 1;
     ECells = E_PERCENTAGE*cell_counter(T, xsize*ysize);
-    sector(E, 3);
+    sector(E, 4);
     while(ECells > 0){
         int allocated = 0;
         for(int node = 0; node<NODE_NUM; node++){
@@ -326,12 +326,18 @@ void sector(double E[], int quadrant){
         first_quad(E);
         break;
     case 2:
+        first_quad(E);
         second_quad(E);
         break;
     case 3:
+        first_quad(E);
+        second_quad(E);
         third_quad(E);
         break;
     case 4:
+        first_quad(E);
+        second_quad(E);
+        third_quad(E);
         fourth_quad(E);
         break;
     }
@@ -352,7 +358,7 @@ void second_quad(double E[]){
     for(int x = 0; x<(2*NX-1)/2;x++){
         for(int y = 0; y<(2*NY-1)/2; y++){
             coordinates_to_node(node, x, y, 2*NX-1, 2*NY-1 );
-            E[node] = 3;
+            E[node] = -1;
         }
     }
 };
@@ -362,7 +368,7 @@ void third_quad(double E[]){
     for(int x = 0; x<(2*NX-1)/2;x++){
         for(int y = (2*NY-1)/2; y<(2*NY-1); y++){
             coordinates_to_node(node, x, y, 2*NX-1, 2*NY-1 );
-            E[node] = 3;
+            E[node] = -1;
         }
     }
 };
@@ -372,7 +378,7 @@ void fourth_quad(double E[]){
     for(int x = (2*NX-1)/2; x<(2*NX-1);x++){
         for(int y = (2*NY-1)/2; y<(2*NY-1); y++){
             coordinates_to_node(node, x, y, 2*NX-1, 2*NY-1 );
-            E[node] = 3;
+            E[node] = -1;
         }
     }
 };
