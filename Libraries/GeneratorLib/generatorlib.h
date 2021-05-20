@@ -7,8 +7,6 @@
 #include <random>
 #include <time.h>
 #include <vector>
-
-#include <../EigenLib/Eigen/Dense>
 #include "../../constants.hpp"
 #include "../Tools/toolslib.h"
 
