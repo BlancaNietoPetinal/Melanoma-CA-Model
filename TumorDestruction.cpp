@@ -26,15 +26,18 @@ int main(){
     create_vec(NODE_NUM, Ecount, 0);
     create_vec(NODE_NUM, Ed, 0);
     create_vec(NODE_NUM, D, 0);
-    T = get_mat("Results/DELETE/T/405.txt", NODE_NUM); 
-    H = get_mat("Results/DELETE/H/405.txt", NODE_NUM); // SE PUEDE PRESCINDIR?
-    
+    //T = get_mat("Results/Generation/Spherical/T/0210.txt", NODE_NUM); 
+    //H = get_mat("Results/Generation/Spherical/H/0210.txt", NODE_NUM); // SE PUEDE PRESCINDIR?
+    T = get_mat("Results/DELETE/T/400.txt", NODE_NUM); 
+    H = get_mat("Results/DELETE/H/400.txt", NODE_NUM);
+
     //suggestion usar std::tuple para obtener los valores
     Td = int_2_double(T, NODE_NUM);
     Hd = int_2_double(H, NODE_NUM);
 
     effectorCellPlacement(2*NX-1, 2*NY-1, Td, Ed);
-    save_mat(NODE_NUM, Ed, "Results/Destruction/Disconnected/E/initial.txt");
+    save_mat(NODE_NUM, Ed, "Results/Destruction/Spherical/E/initial.txt");
+
     for(int i=0; i<DESTRUCTION_IT; i++){
         tumor_lysis(Td, Ed, Ecount, Dd, Hd, xsize, ysize);
         for(int node=0; node<NODE_NUM; node++){
@@ -44,14 +47,14 @@ int main(){
             Ed[node] = Sol[2];
         }
         std::cout<<"ITERACION: "<<i<<std::endl;
-        save_mat(NODE_NUM, Td, "Results/Destruction/Disconnected/T/"+std::to_string(i)+".txt");
-        save_mat(NODE_NUM, Ed, "Results/Destruction/Disconnected/E/"+std::to_string(i)+".txt");
-        //save_mat(NODE_NUM, Ecount, "Results/Destruction/Disconnected/Ecount/"+std::to_string(i)+".txt");
-        save_mat(NODE_NUM, Hd, "Results/Destruction/Disconnected/H/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Td, "Results/Destruction/Spherical/T/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Ed, "Results/Destruction/Spherical/E/"+std::to_string(i)+".txt");
+        //save_mat(NODE_NUM, Ecount, "Results/Destruction/Spherical/Ecount/"+std::to_string(i)+".txt");
+        save_mat(NODE_NUM, Hd, "Results/Destruction/Spherical/H/"+std::to_string(i)+".txt");
         T_cells[i] = cell_counter(Td, NODE_NUM);
         if( (no_cells(Td, NODE_NUM)) || (no_cells(Ed, NODE_NUM)) )break;
     }
-    save_mat(DESTRUCTION_IT, T_cells, "Results/Destruction/Disconnected/T/cell_count.txt");
+    save_mat(DESTRUCTION_IT, T_cells, "Results/Destruction/Spherical/T/cell_count.txt");
 
     delete [] Ed;
     delete [] Ecount;

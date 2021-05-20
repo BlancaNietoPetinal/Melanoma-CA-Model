@@ -129,6 +129,9 @@ void tumor_lysis(double T[], double E[], int Ecount[], double D[], double H[], i
     std::uniform_int_distribution<int> dice_distribution(1,2);
     std::vector<int> Tneighbours;
     int dice, node = 0;
+
+
+
     for(int x = 0; x < xsize; x++)
     {
         for(int y = 0; y < ysize; y++)
@@ -173,6 +176,10 @@ void lysis(double T[], double E[], int Ecount[], double D[], double H[], int nod
         index = u_distrib(generator) % Tneighbours.size();
         neignode = Tneighbours[index];
         T[neignode]--; D[neignode]++; Ecount[node]++;
+
+        if(T[neignode]==0){
+            H[neignode] = 1;
+        }
 
         Hneighbours = get_specific_neighbours(H, node, 1, 0, '>', xsize, ysize);
         for(int j = 0; j<Hneighbours.size(); j++){
@@ -291,17 +298,21 @@ void random_place_cell(double * mat, int n_cells_to_place, int xsize, int ysize)
 void effectorCellPlacement(int xsize, int ysize, double T[], double E[]){
     std::vector<int> Tneighbours;
     int ECells, i = 1;
+
     ECells = E_PERCENTAGE*cell_counter(T, xsize*ysize);
     sector(E, 4);
     while(ECells > 0){
         int allocated = 0;
         for(int node = 0; node<NODE_NUM; node++){
             if( (T[node]==0) & (E[node] == -1)){
-                Tneighbours = get_specific_neighbours(T, node, i, 0, '>', xsize, ysize);
-                if((!Tneighbours.empty()) ){
+                Tneighbours = get_specific_neighbours(T, node, 1, 0, '>', xsize, ysize);
+                if( (!Tneighbours.empty()) ){
                     E[node] = 1;
                     ECells--;
                     allocated++;
+                }
+                else{
+                    
                 }
             }
         }
@@ -326,18 +337,12 @@ void sector(double E[], int quadrant){
         first_quad(E);
         break;
     case 2:
-        first_quad(E);
         second_quad(E);
         break;
     case 3:
-        first_quad(E);
-        second_quad(E);
         third_quad(E);
         break;
     case 4:
-        first_quad(E);
-        second_quad(E);
-        third_quad(E);
         fourth_quad(E);
         break;
     }
@@ -355,7 +360,7 @@ void first_quad(double E[]){
 
 void second_quad(double E[]){
     int node;
-    for(int x = 0; x<(2*NX-1)/2;x++){
+    for(int x = 0; x<(2*NX-1);x++){
         for(int y = 0; y<(2*NY-1)/2; y++){
             coordinates_to_node(node, x, y, 2*NX-1, 2*NY-1 );
             E[node] = -1;
@@ -365,8 +370,8 @@ void second_quad(double E[]){
 
 void third_quad(double E[]){
     int node;
-    for(int x = 0; x<(2*NX-1)/2;x++){
-        for(int y = (2*NY-1)/2; y<(2*NY-1); y++){
+    for(int x = 0; x<(2*NX-1);x++){
+        for(int y = 0; y<(2*NY-1); y++){
             coordinates_to_node(node, x, y, 2*NX-1, 2*NY-1 );
             E[node] = -1;
         }
@@ -375,8 +380,8 @@ void third_quad(double E[]){
 
 void fourth_quad(double E[]){
     int node;
-    for(int x = (2*NX-1)/2; x<(2*NX-1);x++){
-        for(int y = (2*NY-1)/2; y<(2*NY-1); y++){
+    for(int x = 0; x<(2*NX-1);x++){
+        for(int y = 0; y<(2*NY-1); y++){
             coordinates_to_node(node, x, y, 2*NX-1, 2*NY-1 );
             E[node] = -1;
         }
