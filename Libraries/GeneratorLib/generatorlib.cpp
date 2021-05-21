@@ -55,8 +55,8 @@ void migracion(double M[], int T[], int D[], int H[], float DIV_mat[], int node,
     double P = 1 - exp( - (T[node] * pow(M[node]/MIG,2)));
     P = 0;
     if(P>fabs(rnd_n)){
-        neighbour_nodes = get_neighbours(T, node, 1, xsize, ysize);
-        free_nodes = get_specific_neighbours(T, node, 1, 0, '=', xsize, ysize);
+        neighbour_nodes = get_neighbours(T, node);
+        free_nodes = get_specific_neighbours(T, node, 0, '=');
         if( !free_nodes.empty() ){ // hay nodos vecinos vacios
             index = dice_distr(generator) % free_nodes.size();
             neighbour_node = free_nodes[index];
@@ -113,7 +113,7 @@ void mutation(int T[], float DIV_mat[]){ //ANADIR DECRECIMIENTO??
     std::knuth_b generator(seed);
     std::uniform_int_distribution<int> dice_distribution(1,int(NX/10)); //CAMBIAR EL 3??
     int rnd = dice_distribution(generator);
-    std::normal_distribution<float> distribution(DIV,0.2);
+    std::normal_distribution<float> distribution(DIV,0.1);
 
     number_T_cells = cell_counter(T, NODE_NUM);
     if( (number_T_cells>2) & (mutated<MUTATED_CELLS) & (rnd == 2) ){
@@ -135,7 +135,7 @@ void division(double N[], int T[], int D[], int H[], float DIV_mat[], int node, 
     
     P = 1 - exp( - pow(N[node]/(T[node]*DIV_mat[node]), 2));
     if(P>fabs(rnd_n)){
-        free_nodes = get_specific_neighbours(T,node,1,0,'=',xsize,ysize);
+        free_nodes = get_specific_neighbours(T,node,0,'=');
         if( free_nodes.empty() ){
             T[node]++;
         }
@@ -154,7 +154,3 @@ void division(double N[], int T[], int D[], int H[], float DIV_mat[], int node, 
     }
     return;
 };
-
-
-// HACER: meter un delay al final de cada random para que haga nums random
-// A VECES SALE UN THETA:-0.1 QUE HAY QUE ARREGLAR

@@ -53,17 +53,21 @@ int main(){
         //save_mat(NODE_NUM, Ecount, "Results/Destruction/Spherical/Ecount/"+std::to_string(i)+".txt");
         save_mat(NODE_NUM, Hd, "Results/Destruction/Spherical/H/"+std::to_string(i)+".txt");
         T_cells[i] = cell_counter(Td, NODE_NUM);
-        if( (no_cells(Td, NODE_NUM)) || (no_cells(Ed, NODE_NUM)) )break;
+        if( (no_cells(Td, NODE_NUM)) || (no_cells(Ed, NODE_NUM)) ){
+            break;
+        };
     }
-    save_mat(DESTRUCTION_IT, T_cells, "Results/Destruction/Spherical/T/cell_count.txt");
-
-    delete [] Ed;
-    delete [] Ecount;
-    delete [] D;
-    delete [] Dd;
-    delete [] H;
-    delete [] Hd;
-    delete [] T;
-    delete [] Td;
+    //save_mat(DESTRUCTION_IT, T_cells, "Results/Destruction/Spherical/T/cell_count.txt");
+    //delete [] Ed;
+    //delete [] T_cells;
+    //delete [] Ecount;
+    //delete [] D;
+    //delete [] Dd;
+    //delete [] H;
+    //delete [] Hd;
+    //delete [] T;
+    //delete [] Td;
+    //delete [] Ed;
+    //delete [] Sol;
     return 0;
 }

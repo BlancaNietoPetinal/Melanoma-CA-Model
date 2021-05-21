@@ -7,9 +7,11 @@ namespace constants {
   const int QUAD_NUM = 3;
   const int NX = 30;
   const int NY = 30;
+  const int X_SIZE = 2 * NX - 1;
+  const int Y_SIZE = 2 * NY - 1;
   const int GENERATION_IT = 20000;
   const int ELEMENT_NUM = ( NX - 1 ) * ( NY - 1 ) * 2;
-  const int NODE_NUM = ( 2 * NX - 1 ) * ( 2 * NY - 1 );
+  const int NODE_NUM = (2 * NX - 1) * (2 * NY - 1);
   const double L_N = 150;
   const double L_M = 10;
   const double COEF_DIFF = 5;//1; //in assemble
@@ -24,12 +26,10 @@ namespace constants {
   const int MUTATED_CELLS = 30;
 
   // tumor lysis consts
-  const int DESTRUCTION_IT = 10;
+  const int DESTRUCTION_IT = 100;
   const double LYS = 0.2;
   const double REC = 0.9;
   const double INC = 0.1;
-  const int NEIGBOUR_NUMBER1 = 1; // for tumor destruction laws
-  const int NEIGBOUR_NUMBER3 = 1; // for tumor destruction laws
   const double E_PERCENTAGE = 0.5; //percentage of E cells, E = E_PER*T_CELLS
 
   

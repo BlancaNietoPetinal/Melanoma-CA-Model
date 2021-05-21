@@ -22,78 +22,71 @@ int * get_mat(std::string filename, int matlen){
     }
     return mat;
 };
-void node_to_coordinates(int node, int &x, int &y, int xsize, int ysize){
-    int n = 0;
-    bool esc = false;
-    if(node>=(xsize*ysize)){
+
+void node_to_coordinates(int node, int &x, int &y){
+    if(node>NODE_NUM){
         std::cout<<"La matriz es demasiado pequena para albergar ese nodo.";
     }
+    y = int(node/X_SIZE);
+    x = node - y*X_SIZE;
 
-    int yd,xd;
-
-    yd = int(node/59); //(node % 60);
-    xd = node - yd*(59);
-    for(int xcoor = 0; xcoor<xsize; xcoor++){
-        for(int ycoor = 0; ycoor<ysize; ycoor++){
-            if(n == node){
-                x = xcoor;
-                y = ycoor;
-                esc = true;
-                break;
-            }
-            n++;
-        }
-        if(esc){
-            break;
-        }
-    }
-    
 };
 
-void coordinates_to_node(int &node, int x, int y, int xsize, int ysize){
+void coordinates_to_node(int &node, int x, int y){
     node = ((2*NX-1)-1)*y+(y+x);
 }
 
-std::vector<int> get_neighbours(int *mat, int node, int d, int xsize, int ysize){ //devolver puntero??
+std::vector<int> get_neighbours(int *mat, int node){
+    // Devuelve los vecinos de un nodo
+    int x,y,right_node, left_node, up_node,down_node, diag_ur_node,diag_ul_node, diag_dr_node, diag_dl_node;
+    node_to_coordinates(node, x, y);
+    up_node = node-1;
+    down_node = node+1;
+    coordinates_to_node(right_node,x,y-1);
+    coordinates_to_node(left_node,x,y+1);
+    coordinates_to_node(diag_ur_node,x-1,y+1);
+    coordinates_to_node(diag_ul_node,x-1,y-1);
+    coordinates_to_node(diag_dr_node,x+1,y+1);
+    coordinates_to_node(diag_dl_node,x+1,y-1);
+    std::vector<int> neighbour_nodes{right_node,left_node,
+                                    up_node,down_node,
+                                    diag_ur_node,diag_ul_node, 
+                                    diag_dr_node, diag_dl_node};
+    return neighbour_nodes;
+}
+std::vector<int> get_neighbours(double *mat, int node){ //devolver puntero??
     // devuelve los n vecinos
-    std::vector<int> neighbour_nodes;
-    int x, y, xmin, ymin, xmax, ymax, node2;
-    limits(mat, node, d, xmin, ymin, xmax, ymax, xsize, ysize);
-    for(int xcoor = xmin; xcoor<=xmax; xcoor++){
-        for(int ycoor = ymin; ycoor<=ymax; ycoor++){
-            coordinates_to_node(node2, xcoor, ycoor, xsize, ysize);
-            if(node2!=node){
-                neighbour_nodes.push_back(node2);
-            }
-            
-        }
-    }
+    int x,y,right_node, left_node, up_node,down_node, diag_ur_node,diag_ul_node, diag_dr_node, diag_dl_node;
+    node_to_coordinates(node, x, y);
+    up_node = node-1;
+    down_node = node+1;
+    coordinates_to_node(right_node,x,y-1);
+    coordinates_to_node(left_node,x,y+1);
+    coordinates_to_node(diag_ur_node,x-1,y+1);
+    coordinates_to_node(diag_ul_node,x-1,y-1);
+    coordinates_to_node(diag_dr_node,x+1,y+1);
+    coordinates_to_node(diag_dl_node,x+1,y-1);
+    std::vector<int> neighbour_nodes{right_node,left_node,
+                                    up_node,down_node,
+                                    diag_ur_node,diag_ul_node, 
+                                    diag_dr_node, diag_dl_node};
+    neighbour_nodes.erase(std::remove_if(neighbour_nodes.begin(), neighbour_nodes.end(), is_negative), neighbour_nodes.end());
+    neighbour_nodes.erase(std::remove_if(neighbour_nodes.begin(), neighbour_nodes.end(), out_of_mat), neighbour_nodes.end());
+
     return neighbour_nodes;
 
 }
-void limits(int *mat, int node, int d, int &xmin, int &ymin, int &xmax, int &ymax, int xsize, int ysize){
-    // devuelve los limites a una distancia d de un nodo dado
-    int x, y;
-    node_to_coordinates(node, x, y, xsize, ysize);
-    xmin = x-d; ymin = y-d; xmax = x+d; ymax = y+d;
-    while(xmin<0){
-        xmin++;
-    }
-    while(ymin<0){
-        ymin++;
-    }
-    while(xmax>(xsize-1)){
-        xmax--;
-    }
-    while(ymax>(ysize-1)){
-        ymax--;
-    }
+bool out_of_mat(int value){
+    return (value>NODE_NUM);
+}
+bool is_negative(int value){
+    return (value<=0);
+}
 
-};
-std::vector<int> get_specific_neighbours(int *mat, int node, int d, int value, char mode,  int xsize, int ysize){
+std::vector<int> get_specific_neighbours(int *mat, int node, int value, char mode){
     // gets the n neighbours with a specific value and a operator specified
     std::vector<int> neighbour_nodes, specific_neighbour_nodes;
-    neighbour_nodes = get_neighbours(mat, node, d, xsize, ysize);
+    neighbour_nodes = get_neighbours(mat, node);
 
     for(int i = 0; i<neighbour_nodes.size(); i++){
         switch (mode)
@@ -118,47 +111,13 @@ std::vector<int> get_specific_neighbours(int *mat, int node, int d, int value, c
 
     return specific_neighbour_nodes;
 };
-std::vector<int> get_neighbours(double *mat, int node, int d, int xsize, int ysize){ //devolver puntero??
-    // devuelve los n vecinos
-    std::vector<int> neighbour_nodes;
-    int x, y, xmin, ymin, xmax, ymax, node2;
-    limits(mat, node, d, xmin, ymin, xmax, ymax, xsize, ysize);
-    for(int xcoor = xmin; xcoor<=xmax; xcoor++){
-        for(int ycoor = ymin; ycoor<=ymax; ycoor++){
-            coordinates_to_node(node2, xcoor, ycoor, xsize, ysize);
-            if(node2!=node){
-                neighbour_nodes.push_back(node2);
-            }
-            
-        }
-    }
-    return neighbour_nodes;
-
-}
-void limits(double *mat, int node, int d, int &xmin, int &ymin, int &xmax, int &ymax, int xsize, int ysize){
-    // devuelve los limites a una distancia d de un nodo dado
-    int x, y;
-    node_to_coordinates(node, x, y, xsize, ysize);
-    xmin = x-d; ymin = y-d; xmax = x+d; ymax = y+d;
-    while(xmin<0){
-        xmin++;
-    }
-    while(ymin<0){
-        ymin++;
-    }
-    while(xmax>(xsize-1)){
-        xmax--;
-    }
-    while(ymax>(ysize-1)){
-        ymax--;
-    }
-
-};
-std::vector<int> get_specific_neighbours(double *mat, int node, int d, int value, char mode,  int xsize, int ysize){
+std::vector<int> get_specific_neighbours(double *mat, int node, int value, char mode){
     // gets the n neighbours with a specific value and a operator specified
     std::vector<int> neighbour_nodes, specific_neighbour_nodes;
-    neighbour_nodes = get_neighbours(mat, node, d, xsize, ysize);
-
+    neighbour_nodes = get_neighbours(mat, node);
+    if(node == 3483){
+        std::cout<<"A"<<std::endl;
+    }
     for(int i = 0; i<neighbour_nodes.size(); i++){
         switch (mode)
         {
@@ -182,13 +141,13 @@ std::vector<int> get_specific_neighbours(double *mat, int node, int d, int value
 
     return specific_neighbour_nodes;
 };
+
 void create_vec(int node_num, int mat[], int value){ //poner un mensaje si node_num no es correcto
     for (int i = 0; i<node_num; i++) 
     {
         mat[i] = value;
     }
 }
-
 void create_vec(int node_num, float mat[], float value){
     for (int i = 0; i<node_num; i++) 
     {
