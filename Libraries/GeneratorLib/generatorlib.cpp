@@ -113,9 +113,9 @@ void mutation(int T[], float DIV_mat[]){ //ANADIR DECRECIMIENTO??
     std::knuth_b generator(seed);
     std::uniform_int_distribution<int> dice_distribution(1,int(NX/10)); //CAMBIAR EL 3??
     int rnd = dice_distribution(generator);
-    std::normal_distribution<float> distribution(DIV,0.1);
+    std::normal_distribution<float> distribution(DIV,0.2);
 
-    number_T_cells = cell_counter(T, NODE_NUM);
+    number_T_cells = cell_counter(T);
     if( (number_T_cells>2) & (mutated<MUTATED_CELLS) & (rnd == 2) ){
         get_occupied_nodes(T, T_nodes);
         index = dice_distribution(generator) % number_T_cells;

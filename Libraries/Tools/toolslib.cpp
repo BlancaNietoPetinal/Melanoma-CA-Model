@@ -52,6 +52,9 @@ std::vector<int> get_neighbours(int *mat, int node){
                                     up_node,down_node,
                                     diag_ur_node,diag_ul_node, 
                                     diag_dr_node, diag_dl_node};
+    neighbour_nodes.erase(std::remove_if(neighbour_nodes.begin(), neighbour_nodes.end(), is_negative), neighbour_nodes.end());
+    neighbour_nodes.erase(std::remove_if(neighbour_nodes.begin(), neighbour_nodes.end(), out_of_mat), neighbour_nodes.end());
+
     return neighbour_nodes;
 }
 std::vector<int> get_neighbours(double *mat, int node){ //devolver puntero??
@@ -115,9 +118,6 @@ std::vector<int> get_specific_neighbours(double *mat, int node, int value, char 
     // gets the n neighbours with a specific value and a operator specified
     std::vector<int> neighbour_nodes, specific_neighbour_nodes;
     neighbour_nodes = get_neighbours(mat, node);
-    if(node == 3483){
-        std::cout<<"A"<<std::endl;
-    }
     for(int i = 0; i<neighbour_nodes.size(); i++){
         switch (mode)
         {
@@ -183,6 +183,15 @@ void save_mat(int node_num, double mat[], std::string filename){
     File.close();
 }
 
+void save_vec(std::vector<int> mat, std::string filename){
+    std::ofstream File(filename); 
+    for(int node = 0; node<mat.size(); node++){
+        File << mat[node] << std::endl;
+    }
+    File.close();
+}
+
+
 void changeNegativeValue(double &value){
     if(value<0){
         value = 0;
@@ -231,16 +240,16 @@ double* int_2_double(int mat[], int matlen){
     return matd;
 };
 
-int cell_counter(int mat[], int matlen){
+int cell_counter(int mat[]){
     int n_cells = 0;
-    for(int node = 0;node<matlen; node++){
+    for(int node = 0;node<NODE_NUM; node++){
         n_cells = n_cells + mat[node];
     };
     return n_cells;
 };
-int cell_counter(double mat[], int matlen){
+int cell_counter(double mat[]){
     int n_cells = 0;
-    for(int node = 0;node<matlen; node++){
+    for(int node = 0;node<NODE_NUM; node++){
         n_cells = n_cells + mat[node];
     };
     return n_cells;

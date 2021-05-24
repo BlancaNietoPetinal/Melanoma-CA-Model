@@ -5,8 +5,8 @@
 namespace constants {
   const int NNODES = 6;
   const int QUAD_NUM = 3;
-  const int NX = 30;
-  const int NY = 30;
+  const int NX = 110;
+  const int NY = 110;
   const int X_SIZE = 2 * NX - 1;
   const int Y_SIZE = 2 * NY - 1;
   const int GENERATION_IT = 20000;
@@ -14,7 +14,7 @@ namespace constants {
   const int NODE_NUM = (2 * NX - 1) * (2 * NY - 1);
   const double L_N = 150;
   const double L_M = 10;
-  const double COEF_DIFF = 5;//1; //in assemble
+  const double COEF_DIFF = 10;//1; //in assemble
   const double STARTING_NUTRIENTS = 1;
   const double ALPHA = 0.93;
   const double NEC = 0;//0.01;
@@ -23,15 +23,15 @@ namespace constants {
 
   // Modelizacion de melanomas
   const double MAX_PILED_CELL = 50;
-  const int MUTATED_CELLS = 30;
+  const int MUTATED_CELLS = 60;
 
   // tumor lysis consts
-  const int DESTRUCTION_IT = 100;
-  const double LYS = 0.2;
+  const int DESTRUCTION_IT = 1000;
+  const double LYS = 0.3;
   const double REC = 0.9;
-  const double INC = 0.1;
-  const double E_PERCENTAGE = 0.5; //percentage of E cells, E = E_PER*T_CELLS
-
+  const double INC = 0.9;
+  const double E_PERCENTAGE = 1; //percentage of E cells, E = E_PER*T_CELLS
+  const int QUADRANT = 1;
   
   const float A12 = 1.1*pow(10,-10);
   const float A21 = 4.8*pow(10,-10);

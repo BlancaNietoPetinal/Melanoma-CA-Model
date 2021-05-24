@@ -47,11 +47,6 @@
                 //"${file}",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
-                "-I",
-                "C:\\Users\\Lenovo\\Documents\\Universidades\\URJC\\Cuarto\\OneDrive - Universidad Rey Juan Carlos\\TFG\\Main\\Libraries\\EigenLib",
-                //"-Wall",
-                //"-I",
-                //"C:\\Users\\Lenovo\\Documents\\Universidades\\URJC\\Cuarto\\OneDrive - Universidad Rey Juan Carlos\\TFG\\Main\\Libraries\\gsl"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

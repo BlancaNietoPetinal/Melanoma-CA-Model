@@ -3,11 +3,10 @@
 # include <iostream>
 # include "Libraries/DestructionLib/destructionlib.h"
 # include "Libraries/Tools/toolslib.h"
-# include "Libraries/RK4/rk4lib.h"
 # include "constants.hpp"
 using namespace constants;
 
-int *T, *Ecount, *D, *H, *T_cells; 
+int *T, *Ecount, *D, *H, *T_cells, N_T_cells, d = 0; 
 double *Td, *Hd, *Ed, *Dd, *Sol, r;
 int xsize = 2*NX-1, ysize = 2*NY-1, Tdi, Tdf;
 int main(){
@@ -15,49 +14,58 @@ int main(){
     Ecount = new int[NODE_NUM];
     D = new int[NODE_NUM];
     H = new int[NODE_NUM];
-
     Td = new double[NODE_NUM];
     Hd = new double[NODE_NUM];
     Ed = new double[NODE_NUM];
     Dd = new double[NODE_NUM];
     Sol = new double[NODE_NUM];
-    T_cells = new int[DESTRUCTION_IT];
-
+    std::vector<int> T_cells;
+    std::string TUMOR_TYPE = "Disconnected";
     create_vec(NODE_NUM, Ecount, 0);
     create_vec(NODE_NUM, Ed, 0);
-    create_vec(NODE_NUM, D, 0);
-    //T = get_mat("Results/Generation/Spherical/T/0210.txt", NODE_NUM); 
-    //H = get_mat("Results/Generation/Spherical/H/0210.txt", NODE_NUM); // SE PUEDE PRESCINDIR?
-    T = get_mat("Results/DELETE/T/400.txt", NODE_NUM); 
-    H = get_mat("Results/DELETE/H/400.txt", NODE_NUM);
+    create_vec(NODE_NUM, Dd, 0);
+    T = get_mat("../Results/Generation/"+TUMOR_TYPE+"/T/0180.txt", NODE_NUM); 
+    H = get_mat("../Results/Generation/"+TUMOR_TYPE+"/H/0180.txt", NODE_NUM); //prescindir?
 
     //suggestion usar std::tuple para obtener los valores
     Td = int_2_double(T, NODE_NUM);
     Hd = int_2_double(H, NODE_NUM);
 
-    effectorCellPlacement(2*NX-1, 2*NY-1, Td, Ed);
-    save_mat(NODE_NUM, Ed, "Results/Destruction/Spherical/E/initial.txt");
+    effectorCellPlacement(Td, Ed);
+    save_mat(NODE_NUM, Ed, "../Results/Destruction/"+TUMOR_TYPE+"/"+std::to_string(QUADRANT)+"Q/E/initial.txt");
+        int diff = 0;
+        for(int i=0; i<DESTRUCTION_IT; i++){
+            if(i%5 == 0){
+                save_mat(NODE_NUM, Td, "../Results/Destruction/"+TUMOR_TYPE+"/"+std::to_string(QUADRANT)+"Q/T/"+std::to_string(i)+".txt");
+            }
+            
+            tumor_lysis(Td, Ed, Ecount, Dd, Hd);
 
-    for(int i=0; i<DESTRUCTION_IT; i++){
-        tumor_lysis(Td, Ed, Ecount, Dd, Hd, xsize, ysize);
-        for(int node=0; node<NODE_NUM; node++){
-            Sol = RK4(Td[node], Hd[node], Ed[node]);
-            Td[node] = Sol[0];
-            Hd[node] = Sol[1];
-            Ed[node] = Sol[2];
+            std::cout<<"ITERACION: "<<i<<std::endl;
+            if(i%5 == 0){
+            save_mat(NODE_NUM, Ed, "../Results/Destruction/"+TUMOR_TYPE+"/"+std::to_string(QUADRANT)+"Q/E/"+std::to_string(i)+".txt");
+            save_mat(NODE_NUM, Dd, "../Results/Destruction/"+TUMOR_TYPE+"/"+std::to_string(QUADRANT)+"Q/D/"+std::to_string(i)+".txt");
+            save_mat(NODE_NUM, Ecount, "../Results/Destruction/"+TUMOR_TYPE+"/"+std::to_string(QUADRANT)+"Q/Ecount/"+std::to_string(i)+".txt");
+            save_mat(NODE_NUM, Hd, "../Results/Destruction/"+TUMOR_TYPE+"/"+std::to_string(QUADRANT)+"Q/H/"+std::to_string(i)+".txt");
+            }
+            N_T_cells = cell_counter(Td);
+            T_cells.push_back(N_T_cells);
+            diff = N_T_cells-diff;
+            if( no_cells(Td) || no_cells(Ed)){
+                break;
+            };
+            if((diff == 0)){
+                d++;
+            }  
+            if(diff != 0){
+                d = 0;
+            } 
+            if(d>5){
+                break;
+            }
+            diff = N_T_cells;
         }
-
-        std::cout<<"ITERACION: "<<i<<std::endl;
-        save_mat(NODE_NUM, Td, "Results/Destruction/Spherical/T/"+std::to_string(i)+".txt");
-        save_mat(NODE_NUM, Ed, "Results/Destruction/Spherical/E/"+std::to_string(i)+".txt");
-        //save_mat(NODE_NUM, Ecount, "Results/Destruction/Spherical/Ecount/"+std::to_string(i)+".txt");
-        save_mat(NODE_NUM, Hd, "Results/Destruction/Spherical/H/"+std::to_string(i)+".txt");
-        T_cells[i] = cell_counter(Td, NODE_NUM);
-        if( (no_cells(Td, NODE_NUM)) || (no_cells(Ed, NODE_NUM)) ){
-            break;
-        };
-    }
-    //save_mat(DESTRUCTION_IT, T_cells, "Results/Destruction/Spherical/T/cell_count.txt");
+        save_vec(T_cells, "../Results/Destruction/"+TUMOR_TYPE+"/T_cell_count-"+std::to_string(QUADRANT)+".txt");
     //delete [] Ed;
     //delete [] T_cells;
     //delete [] Ecount;

@@ -41,7 +41,7 @@ int node;
 bool node_label;
 int node_show;
 double node_xy[2*NODE_NUM];
-std::string folder = "Results/DELETE/";
+std::string folder = "../Results/DELETE/";
 std::string node_txt_file_name = folder + "rectangle_nodes.txt";
 std::string time_file_name = folder + "rectangle_time.txt";
 std::string triangulation_txt_file_name = folder + "rectangle_elements.txt";
