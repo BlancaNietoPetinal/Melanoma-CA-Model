@@ -60,6 +60,7 @@ double xr = 1.0;
 double yb = 0.0;
 double yq[QUAD_NUM*ELEMENT_NUM];
 double yt = 1.0;
+int COEF_DIFF = 700;
 
 int main ( void )
 {
@@ -155,14 +156,17 @@ int main ( void )
     time = ( ( double ) ( time_step_num - time_step ) * time_init
            + ( double ) (                 time_step ) * time_final )
            / ( double ) ( time_step_num             );
-
+    
+    if(T[int((2*NX -1)*(2*NY - 1)/2)]>1){
+      COEF_DIFF = 7;
+    }
     // ensamblamos la matriz de coeficientes A y el lado dcho F
     assemble ( NODE_NUM, node_xy, NNODES,
       ELEMENT_NUM, element_node, QUAD_NUM,
-      wq, xq, yq, element_area, ib, time, a_N, f_N, N_old, T, H, L_N, ALPHA );
+      wq, xq, yq, element_area, ib, time, a_N, f_N, N_old, T, H, L_N, ALPHA, COEF_DIFF);
     assemble ( NODE_NUM, node_xy, NNODES,
       ELEMENT_NUM, element_node, QUAD_NUM,
-      wq, xq, yq, element_area, ib, time, a_M, f_M, M_old, T, H, L_M, ALPHA );
+      wq, xq, yq, element_area, ib, time, a_M, f_M, M_old, T, H, L_M, ALPHA, COEF_DIFF);
 
     // Modificamos A y F para conseguir dN/dt o dM/dt
     adjust_backward_euler ( NODE_NUM, node_xy, NNODES, ELEMENT_NUM,

@@ -14,7 +14,7 @@ void assemble ( int node_num, double node_xy[], int nnodes,
   int element_num, int element_node[], int quad_num,
   double wq[], double xq[], double yq[], double element_area[],
   int ib, double time, double a[], double f[], double u_old[],
-  int T[], int H[], float lambda, double ALPHA );
+  int T[], int H[], float lambda, double ALPHA, int COEF_DIFF);
 int bandwidth ( int nnodes, int element_num, int element_node[],
   int node_num );
 int dgb_fa ( int n, int ml, int mu, double a[], int pivot[] );

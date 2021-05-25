@@ -14,7 +14,7 @@ namespace constants {
   const int NODE_NUM = (2 * NX - 1) * (2 * NY - 1);
   const double L_N = 150;
   const double L_M = 10;
-  const double COEF_DIFF = 10;//1; //in assemble
+  //const double COEF_DIFF = 10;//1; //in assemble
   const double STARTING_NUTRIENTS = 1;
   const double ALPHA = 0.93;
   const double NEC = 0;//0.01;
