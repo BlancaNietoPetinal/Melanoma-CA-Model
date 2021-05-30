@@ -57,28 +57,7 @@ std::vector<int> get_neighbours(int *mat, int node){
 
     return neighbour_nodes;
 }
-std::vector<int> get_neighbours(double *mat, int node){ //devolver puntero??
-    // devuelve los n vecinos
-    int x,y,right_node, left_node, up_node,down_node, diag_ur_node,diag_ul_node, diag_dr_node, diag_dl_node;
-    node_to_coordinates(node, x, y);
-    up_node = node-1;
-    down_node = node+1;
-    coordinates_to_node(right_node,x,y-1);
-    coordinates_to_node(left_node,x,y+1);
-    coordinates_to_node(diag_ur_node,x-1,y+1);
-    coordinates_to_node(diag_ul_node,x-1,y-1);
-    coordinates_to_node(diag_dr_node,x+1,y+1);
-    coordinates_to_node(diag_dl_node,x+1,y-1);
-    std::vector<int> neighbour_nodes{right_node,left_node,
-                                    up_node,down_node,
-                                    diag_ur_node,diag_ul_node, 
-                                    diag_dr_node, diag_dl_node};
-    neighbour_nodes.erase(std::remove_if(neighbour_nodes.begin(), neighbour_nodes.end(), is_negative), neighbour_nodes.end());
-    neighbour_nodes.erase(std::remove_if(neighbour_nodes.begin(), neighbour_nodes.end(), out_of_mat), neighbour_nodes.end());
 
-    return neighbour_nodes;
-
-}
 bool out_of_mat(int value){
     return (value>NODE_NUM);
 }
@@ -114,33 +93,7 @@ std::vector<int> get_specific_neighbours(int *mat, int node, int value, char mod
 
     return specific_neighbour_nodes;
 };
-std::vector<int> get_specific_neighbours(double *mat, int node, int value, char mode){
-    // gets the n neighbours with a specific value and a operator specified
-    std::vector<int> neighbour_nodes, specific_neighbour_nodes;
-    neighbour_nodes = get_neighbours(mat, node);
-    for(int i = 0; i<neighbour_nodes.size(); i++){
-        switch (mode)
-        {
-        case '=':
-            if((mat[neighbour_nodes[i]] == value)){
-                specific_neighbour_nodes.push_back(neighbour_nodes[i]);
-            }
-            break;
-        
-        case '>':
-            if(mat[neighbour_nodes[i]] > value){
-                specific_neighbour_nodes.push_back(neighbour_nodes[i]);
-            }
-            break;
-        case '<':
-            if(mat[neighbour_nodes[i]] < value){
-                specific_neighbour_nodes.push_back(neighbour_nodes[i]);
-            }
-        }
-    }
 
-    return specific_neighbour_nodes;
-};
 
 void create_vec(int node_num, int mat[], int value){ //poner un mensaje si node_num no es correcto
     for (int i = 0; i<node_num; i++) 
@@ -154,12 +107,7 @@ void create_vec(int node_num, float mat[], float value){
         mat[i] = value;
     }
 };
-void create_vec(int node_num, double mat[], double value){
-    for (int i = 0; i<node_num; i++) 
-    {
-        mat[i] = value;
-    }
-};
+
 
 void save_mat(int node_num, int mat[], std::string filename){
     std::ofstream File(filename); 
@@ -244,27 +192,11 @@ int cell_counter(int mat[]){
     int n_cells = 0;
     for(int node = 0;node<NODE_NUM; node++){
         n_cells = n_cells + mat[node];
+        if(n_cells<0){
+            std::cout<<"Hay mas nodos de los que deberia."<<std::endl;
+        }
     };
     return n_cells;
-};
-int cell_counter(double mat[]){
-    int n_cells = 0;
-    for(int node = 0;node<NODE_NUM; node++){
-        n_cells = n_cells + mat[node];
-    };
-    return n_cells;
-};
-
-void save_num2file(float num, std::string filename){
-    std::ofstream file;
-    file.open ("example.txt");
-    if(file.is_open()){
-        file << std::to_string(num)<< std::endl;
-        file.close();
-    }
-    else{
-        std::cout<<"No se pudo abrir el fichero.";
-    }
 };
 
 void get_occupied_nodes(int mat[], int mat_nodes[]){

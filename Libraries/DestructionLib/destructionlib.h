@@ -14,19 +14,19 @@
 using namespace constants;
 
 
-void get_tumor_limits(double * mat, int xsize, int ysize, int &left, int &right, int &sup, int &inf);
-void tumor_lysis(double T[], double E[], int Ecount[], double D[], double H[]);
-void lysis(double T[], double E[], int Ecount[], double D[], double H[], int node, std::mt19937 generator);
-void recruitment(double T[], double E[], double D[], double H[], int node, std::mt19937 generator);
-void inactivation(double T[], double E[], int Ecount[], double H[], int node, std::mt19937 generator);
-void Emigration(double T[], double E[], int Ecount[], double H[], double D[], int node, std::mt19937 generator);
-int summation(double mat[], std::vector<int> neighbours);
-bool no_cells(double mat[]);
-void random_place_cell(double * mat, int n_cells_to_place); //BORRAR?
-void effectorCellPlacement(double T[], double E[]);
+//void get_tumor_limits(int * mat, int xsize, int ysize, int &left, int &right, int &sup, int &inf);
+void tumor_lysis(int T[], int E[], int Ecount[], int D[], int H[]);
+void lysis(int T[], int E[], int Ecount[], int D[], int H[], int node, std::mt19937 generator);
+void recruitment(int T[], int E[], int D[], int H[], int node, std::mt19937 generator);
+void inactivation(int T[], int E[], int Ecount[], int H[], int node, std::mt19937 generator);
+void Emigration(int T[], int E[], int Ecount[], int H[], int D[], int node, std::mt19937 generator);
+int summation(int mat[], std::vector<int> neighbours);
+bool no_cells(int mat[]);
+void effectorCellPlacement(int T[], int E[]);
+void get_lysis_ratio(int T[], int T0);
 
-void sector(double E[], double T[], int quadrant);
-void first_quad(double E[], double T[]);
-void second_quad(double E[], double T[]);
-void third_quad(double E[], double T[]);
-void fourth_quad(double E[], double T[]);
+void sector(int E[], int T[], int quadrant);
+void first_quad(int E[], int T[]);
+void second_quad(int E[], int T[]);
+void third_quad(int E[], int T[]);
+void fourth_quad(int E[], int T[]);

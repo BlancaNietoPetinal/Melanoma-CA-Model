@@ -41,16 +41,16 @@ int node;
 bool node_label;
 int node_show;
 double node_xy[2*NODE_NUM];
-std::string folder = "../Results/DELETE/";
+std::string folder = "../Results/Generation/Mutated/Papillary/";
 std::string node_txt_file_name = folder + "rectangle_nodes.txt";
 std::string time_file_name = folder + "rectangle_time.txt";
 std::string triangulation_txt_file_name = folder + "rectangle_elements.txt";
-std::string N_nutrients_name = folder + "N/000.txt";
-std::string DIV_filename = folder + "DIV/000.txt";
-std::string M_nutrients_name = folder + "M/000.txt";
-std::string T_filename = folder + "T/000.txt";
-std::string D_filename = folder + "D/000.txt";
-std::string H_filename = folder + "H/000.txt";
+std::string N_nutrients_name = folder + "N/0000.txt";
+std::string DIV_filename = folder + "DIV/0000.txt";
+std::string M_nutrients_name = folder + "M/0000.txt";
+std::string T_filename = folder + "T/0000.txt";
+std::string D_filename = folder + "D/0000.txt";
+std::string H_filename = folder + "H/0000.txt";
 int triangle_show;
 int *node_boundary=(int *) malloc(sizeof(int)*NODE_NUM);
 double wq[QUAD_NUM];
@@ -60,7 +60,7 @@ double xr = 1.0;
 double yb = 0.0;
 double yq[QUAD_NUM*ELEMENT_NUM];
 double yt = 1.0;
-int COEF_DIFF = 700;
+float COEF_DIFF = 10;
 
 int main ( void )
 {
@@ -157,8 +157,8 @@ int main ( void )
            + ( double ) (                 time_step ) * time_final )
            / ( double ) ( time_step_num             );
     
-    if(T[int((2*NX -1)*(2*NY - 1)/2)]>1){
-      COEF_DIFF = 7;
+    if(N_old[int((2*NX -1)*(2*NY - 1)/2)]=!0){
+      COEF_DIFF = 2;
     }
     // ensamblamos la matriz de coeficientes A y el lado dcho F
     assemble ( NODE_NUM, node_xy, NNODES,
@@ -192,19 +192,19 @@ int main ( void )
 
     //  Incremento del filename y guardar la solucion
     time_unit << std::setw(14) << time << "\n"; //se puede quitar??
-    filename_inc ( &N_nutrients_name );
-    filename_inc ( &M_nutrients_name );
     filename_inc ( &DIV_filename );
     filename_inc ( &T_filename );
-    filename_inc ( &D_filename );
     filename_inc ( &H_filename );
+    //filename_inc ( &D_filename );
+    //filename_inc ( &N_nutrients_name );
+    //filename_inc ( &M_nutrients_name );
 
-    if(time_step%1==0){
-      solution_write(NODE_NUM, N, N_nutrients_name);
+    if(time_step%10==0){
       save_mat(NODE_NUM, DIV_mat, DIV_filename);
-      //solution_write(NODE_NUM, M, M_nutrients_name);
       save_mat(NODE_NUM, T, T_filename);
-      save_mat(NODE_NUM, H, H_filename);
+      //save_mat(NODE_NUM, H, H_filename);
+      //solution_write(NODE_NUM, M, M_nutrients_name);
+      solution_write(NODE_NUM, N, N_nutrients_name);
       //save_mat(NODE_NUM, D, D_filename);
     }
   

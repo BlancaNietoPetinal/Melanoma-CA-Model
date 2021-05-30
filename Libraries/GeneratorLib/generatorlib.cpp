@@ -7,7 +7,8 @@ void grow(double M[], double N[], int T[], int D[], int H[], float DIV_mat[], in
                         static_cast<long long>(reinterpret_cast<intptr_t>(&var))};
     std::mt19937 generator(seed);
     std::uniform_int_distribution<int> dice_distribution(1,3);
-    mutation(T, DIV_mat);
+    
+    if(MUTATED_CELLS>0)mutation(T, DIV_mat);
     random_nodes = new int[xsize*ysize];
     random_nodes = get_random_nodes(xsize, ysize);
     for(int i = 0; i < xsize*ysize; i++)
@@ -111,12 +112,12 @@ void mutation(int T[], float DIV_mat[]){ //ANADIR DECRECIMIENTO??
                 std::chrono::high_resolution_clock::now().time_since_epoch()),
                         static_cast<long long>(reinterpret_cast<intptr_t>(&var)))};
     std::knuth_b generator(seed);
-    std::uniform_int_distribution<int> dice_distribution(1,int(NX/10)); //CAMBIAR EL 3??
+    std::uniform_int_distribution<int> dice_distribution(1,4); //CAMBIAR EL 3??
     int rnd = dice_distribution(generator);
-    std::normal_distribution<float> distribution(DIV,0.2);
+    std::normal_distribution<float> distribution(2*DIV/3,0.06);
 
     number_T_cells = cell_counter(T);
-    if( (number_T_cells>2) & (mutated<MUTATED_CELLS) & (rnd == 2) ){
+    if( (number_T_cells>800) & (mutated<MUTATED_CELLS) & (rnd == 2) ){
         get_occupied_nodes(T, T_nodes);
         index = dice_distribution(generator) % number_T_cells;
         node = T_nodes[index];
