@@ -980,7 +980,8 @@ double *dgb_sl ( int n, int ml, int mu, double a[], int pivot[],
       }
     }
   }
-
+  for(int node = 0;node<NODE_NUM;node++)changeNegativeValue(x[node]);
+  
   return x;
 }
 //****************************************************************************80*

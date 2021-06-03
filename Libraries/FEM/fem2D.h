@@ -1,5 +1,6 @@
 #include <string>
 #include "../../constants.hpp"
+#include "../Tools/toolslib.h"
 using namespace constants;
 
 void adjust_backward_euler ( int node_num, double node_xy[], int nnodes,

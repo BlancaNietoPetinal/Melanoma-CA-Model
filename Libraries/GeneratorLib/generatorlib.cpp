@@ -2,6 +2,9 @@
 
 
 void grow(double M[], double N[], int T[], int D[], int H[], float DIV_mat[], int xsize, int ysize){  
+    /* Funcion principal del programa. LLama a todas las acciones posibles
+    que tiene una celula tumoral.
+    */
     int var, dice, *random_nodes, node;
     std::seed_seq seed{static_cast<long long>(std::chrono::high_resolution_clock::now().time_since_epoch().count()),
                         static_cast<long long>(reinterpret_cast<intptr_t>(&var))};
@@ -9,13 +12,11 @@ void grow(double M[], double N[], int T[], int D[], int H[], float DIV_mat[], in
     std::uniform_int_distribution<int> dice_distribution(1,3);
     
     if(MUTATED_CELLS>0)mutation(T, DIV_mat);
-    random_nodes = new int[xsize*ysize];
+    random_nodes = new int[xsize*ysize]; // Matriz con nodos dispuestos aleatoriamente
     random_nodes = get_random_nodes(xsize, ysize);
     for(int i = 0; i < xsize*ysize; i++)
     {   
         node = random_nodes[i];
-        changeNegativeValue(N[node]); // TODO mover a donde esta N y M
-        changeNegativeValue(M[node]);
         if(T[node] >= 1){
             dice = dice_distribution(generator);
             switch (dice)
@@ -35,6 +36,11 @@ void grow(double M[], double N[], int T[], int D[], int H[], float DIV_mat[], in
 }
 
 void necrosis(double M[], int T[], int D[], int node, std::mt19937 generator){
+    /* Determina si la celula tumoral muere o no.En caso afirmativo, 
+    computa una probabilidad P y si es mayor que un numero random,
+    modifica D.
+    */
+
     std::normal_distribution<double> distribution(0,1);
     double rnd_n = distribution(generator), P; 
     P = exp(- pow(M[node]/(T[node]*NEC) ,2));
@@ -48,6 +54,10 @@ void necrosis(double M[], int T[], int D[], int node, std::mt19937 generator){
     return;
 }
 void migracion(double M[], int T[], int D[], int H[], float DIV_mat[], int node, int xsize, int ysize, std::mt19937 generator){
+    /* Determina si la celula tumoral migra. Intercambia el valor de dos pixeles
+    y modifica convenientemente las matrices T, H y D
+    */
+
     std::normal_distribution<double> distribution(0,1);
     std::uniform_int_distribution<int> dice_distr(1,50);
     std::vector<int> neighbour_nodes, free_nodes;
@@ -102,8 +112,10 @@ void migracion(double M[], int T[], int D[], int H[], float DIV_mat[], int node,
     }
 };
 
-void mutation(int T[], float DIV_mat[]){ //ANADIR DECRECIMIENTO??
-    // Asigna mutaciones a las celulas tumorales presentes
+void mutation(int T[], float DIV_mat[]){
+    /*Asigna mutaciones a las celulas tumorales presentes mediante la
+    modificacion de DIV
+    */ 
     int var, *T_nodes, number_T_cells, node, index;
     static int mutated = 0;
     T_nodes = new int[NODE_NUM];
@@ -112,22 +124,24 @@ void mutation(int T[], float DIV_mat[]){ //ANADIR DECRECIMIENTO??
                 std::chrono::high_resolution_clock::now().time_since_epoch()),
                         static_cast<long long>(reinterpret_cast<intptr_t>(&var)))};
     std::knuth_b generator(seed);
-    std::uniform_int_distribution<int> dice_distribution(1,4); //CAMBIAR EL 3??
+    std::uniform_int_distribution<int> dice_distribution(1,4);
     int rnd = dice_distribution(generator);
-    std::normal_distribution<float> distribution(2*DIV/3,0.06);
+    std::normal_distribution<float> distribution(2*DIV/3,0.1);
 
     number_T_cells = cell_counter(T);
-    if( (number_T_cells>800) & (mutated<MUTATED_CELLS) & (rnd == 2) ){
+    if( (number_T_cells>2) & (mutated<MUTATED_CELLS) & (rnd == 2) ){
         get_occupied_nodes(T, T_nodes);
         index = dice_distribution(generator) % number_T_cells;
         node = T_nodes[index];
         DIV_mat[node] = fabs(distribution(generator));
-        std::cout<<"MUTACION: "<<node<<" Mutated: "<<mutated<<std::endl;
         mutated++;
     }
 };
 
 void division(double N[], int T[], int D[], int H[], float DIV_mat[], int node, int xsize, int ysize, std::mt19937 generator){
+    /*Determina si una celula va a dividirse. En caso afirmativo
+    lleva a cabo la division celular modificando T, DIV_mat, H y D*/
+
     std::normal_distribution<double> distribution(0,1);
     std::uniform_int_distribution<int> dice_dist(1,50);
     std::vector<int> free_nodes;
@@ -144,7 +158,7 @@ void division(double N[], int T[], int D[], int H[], float DIV_mat[], int node, 
             index = dice_dist(generator) % free_nodes.size();
             neighbour_node = free_nodes[index];
             T[neighbour_node] = 1;
-            DIV_mat[neighbour_node] = DIV_mat[node]; //NEW
+            DIV_mat[neighbour_node] = DIV_mat[node];
             if(H[neighbour_node] == 1){
                 H[neighbour_node] = 0;
             }

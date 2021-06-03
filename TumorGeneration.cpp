@@ -41,7 +41,7 @@ int node;
 bool node_label;
 int node_show;
 double node_xy[2*NODE_NUM];
-std::string folder = "../Results/Generation/Mutated/Papillary/";
+std::string folder = "../Results/Generation/Mutated/DELETE/";
 std::string node_txt_file_name = folder + "rectangle_nodes.txt";
 std::string time_file_name = folder + "rectangle_time.txt";
 std::string triangulation_txt_file_name = folder + "rectangle_elements.txt";
@@ -158,7 +158,7 @@ int main ( void )
            / ( double ) ( time_step_num             );
     
     if(N_old[int((2*NX -1)*(2*NY - 1)/2)]=!0){
-      COEF_DIFF = 2;
+      COEF_DIFF = 5;
     }
     // ensamblamos la matriz de coeficientes A y el lado dcho F
     assemble ( NODE_NUM, node_xy, NNODES,
