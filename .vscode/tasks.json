@@ -7,12 +7,12 @@
             "args": [
                 "-g",
 
-                "TumorGeneration.cpp",
-                "Libraries/GeneratorLib/generatorlib.cpp",
-                "Libraries/FEM/fem2D.cpp",
+                //"TumorGeneration.cpp",
+                //"Libraries/GeneratorLib/generatorlib.cpp",
+                //"Libraries/FEM/fem2D.cpp",
 
-                //"TumorDestruction.cpp",
-                //"Libraries/DestructionLib/destructionlib.cpp",
+                "TumorDestruction.cpp",
+                "Libraries/DestructionLib/destructionlib.cpp",
 
                 "Libraries/Tools/toolslib.cpp",
                 

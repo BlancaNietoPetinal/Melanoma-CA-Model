@@ -41,7 +41,7 @@ int node;
 bool node_label;
 int node_show;
 double node_xy[2*NODE_NUM];
-std::string folder = "../Results/Generation/Mutated/DELETE/";
+std::string folder = "../Results/Generation/Mutated/Spherical/";
 std::string node_txt_file_name = folder + "rectangle_nodes.txt";
 std::string time_file_name = folder + "rectangle_time.txt";
 std::string triangulation_txt_file_name = folder + "rectangle_elements.txt";
@@ -199,7 +199,7 @@ int main ( void )
     //filename_inc ( &N_nutrients_name );
     //filename_inc ( &M_nutrients_name );
 
-    if(time_step%10==0){
+    if(time_step%5==0){
       save_mat(NODE_NUM, DIV_mat, DIV_filename);
       save_mat(NODE_NUM, T, T_filename);
       //save_mat(NODE_NUM, H, H_filename);

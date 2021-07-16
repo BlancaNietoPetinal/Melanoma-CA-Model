@@ -15,18 +15,23 @@ int main(){
     E = new int[NODE_NUM];
     H = new int[NODE_NUM];
     std::vector<int> T_cells;
-    std::string TUMOR_TYPE = "Papillary";
+    std::string TUMOR_TYPE = "Spherical";
     create_vec(NODE_NUM, Ecount, 0);
     create_vec(NODE_NUM, E, 0);
     create_vec(NODE_NUM, D, 0);
     create_vec(NODE_NUM, H, 1);
-    T = get_mat("../Results/Generation/Mutated/"+TUMOR_TYPE+"/T/0930.txt", NODE_NUM); 
+    //T = get_mat("../Results/Generation/Mutated/"+TUMOR_TYPE+"/T/0930.txt", NODE_NUM); 
     //H = get_mat("../Results/Generation/Mutated/"+TUMOR_TYPE+"/H/0150.txt", NODE_NUM); //prescindir?
+    T = get_mat("../Results/Generation/Mutated/"+TUMOR_TYPE+"/T/0195.txt", NODE_NUM); 
+    
+    
     for(int node = 0;node<NODE_NUM;node++){
         if(T[node]==1) H[node]=0;
     }
     effectorCellPlacement(T, E);
     save_mat(NODE_NUM, E, "../Results/Destruction/Mutated/"+TUMOR_TYPE+"/"+std::to_string(QUADRANT)+"Q/E/initial.txt");
+    //save_mat(NODE_NUM, E, "../Results/Destruction/NonMutated/"+TUMOR_TYPE+"/"+std::to_string(QUADRANT)+"Q/E/initial.txt");
+    
     int diff = 0, T0 = cell_counter(T), Tdead = 0;
         for(int i=0; i<DESTRUCTION_IT; i++){
             

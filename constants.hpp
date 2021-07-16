@@ -5,8 +5,8 @@
 namespace constants {
   const int NNODES = 6;
   const int QUAD_NUM = 3;
-  const int NX = 30;
-  const int NY = 30;
+  const int NX = 60;
+  const int NY = 60;
   const int X_SIZE = 2 * NX - 1;
   const int Y_SIZE = 2 * NY - 1;
   const int GENERATION_IT = 20000;
@@ -31,6 +31,6 @@ namespace constants {
   const double REC = 1;
   const double INC = 0.5;
   const double E_PERCENTAGE = 1; //percentage of E cells, E = E_PER*T_CELLS
-  const int QUADRANT = 1;
+  const int QUADRANT = 4;
 }
 #endif
